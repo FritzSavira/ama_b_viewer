@@ -9,38 +9,46 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# MongoDB Atlas Verbindung herstellen
-# In einer .env-Datei oder als Umgebungsvariable bereitstellen
-MONGODB_URI = os.environ.get('MONGODB_URI')
-client = MongoClient(MONGODB_URI)
-db = client["ama_browser"]
-collection = db["ama_log"]
+# MongoDB-Verbindung initialisieren
+def get_mongo_client():
+    """Erstellt und gibt einen MongoDB-Client zurück."""
+    mongodb_uri = os.environ.get('MONGODB_URI')
+    if not mongodb_uri:
+        raise ValueError("MONGODB_URI ist nicht gesetzt. Bitte Umgebungsvariable oder .env-Datei überprüfen.")
+    return MongoClient(mongodb_uri)
 
+try:
+    client = get_mongo_client()
+    db = client["ama_browser"]
+    collection = db["ama_log"]
+except Exception as e:
+    raise RuntimeError(f"Fehler beim Verbinden mit MongoDB: {e}")
 
 def format_document(doc):
-    # Konvertiere ObjectId zu String für JSON-Serialisierung
+    """Konvertiert ObjectId zu String für JSON-Serialisierung."""
     if '_id' in doc and isinstance(doc['_id'], ObjectId):
         doc['_id'] = str(doc['_id'])
     return doc
 
-
 @app.route('/')
 def index():
+    """Rendert die Hauptseite."""
     return render_template('index.html')
-
 
 @app.route('/api/latest')
 def get_latest():
-    # Den neuesten Datensatz abrufen
-    latest_doc = collection.find_one(sort=[('_id', -1)])
-    if latest_doc:
-        return jsonify(format_document(latest_doc))
-    return jsonify({"error": "Keine Datensätze gefunden"}), 404
-
+    """Gibt den neuesten Datensatz zurück."""
+    try:
+        latest_doc = collection.find_one(sort=[('_id', -1)])
+        if latest_doc:
+            return jsonify(format_document(latest_doc))
+        return jsonify({"error": "Keine Datensätze gefunden"}), 404
+    except Exception as e:
+        return jsonify({"error": f"Fehler beim Abrufen des neuesten Datensatzes: {e}"}), 500
 
 @app.route('/api/previous/<id>')
 def get_previous(id):
-    # Den vorherigen Datensatz abrufen
+    """Gibt den vorherigen Datensatz basierend auf der ID zurück."""
     try:
         current_id = ObjectId(id)
         prev_doc = collection.find_one(
@@ -51,12 +59,11 @@ def get_previous(id):
             return jsonify(format_document(prev_doc))
         return jsonify({"error": "Kein vorheriger Datensatz gefunden"}), 404
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
+        return jsonify({"error": f"Fehler beim Abrufen des vorherigen Datensatzes: {e}"}), 400
 
 @app.route('/api/next/<id>')
 def get_next(id):
-    # Den nächsten Datensatz abrufen
+    """Gibt den nächsten Datensatz basierend auf der ID zurück."""
     try:
         current_id = ObjectId(id)
         next_doc = collection.find_one(
@@ -67,12 +74,11 @@ def get_next(id):
             return jsonify(format_document(next_doc))
         return jsonify({"error": "Kein nächster Datensatz gefunden"}), 404
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
+        return jsonify({"error": f"Fehler beim Abrufen des nächsten Datensatzes: {e}"}), 400
 
 @app.route('/api/delete/<id>', methods=['DELETE'])
 def delete_document(id):
-    # Einen Datensatz löschen
+    """Löscht einen Datensatz basierend auf der ID."""
     try:
         current_id = ObjectId(id)
         result = collection.delete_one({"_id": current_id})
@@ -81,8 +87,8 @@ def delete_document(id):
             return jsonify({"success": True, "message": "Datensatz erfolgreich gelöscht"})
         return jsonify({"error": "Datensatz nicht gefunden"}), 404
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
+        return jsonify({"error": f"Fehler beim Löschen des Datensatzes: {e}"}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Debug-Modus nur in der Entwicklungsumgebung aktivieren
+    app.run(debug=os.environ.get('FLASK_DEBUG', 'False').lower() == 'true')
