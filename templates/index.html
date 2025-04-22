@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Datensatz Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>MongoDB Datensatz Viewer</h1>
+
+        <div class="navigation">
+            <button id="prevBtn">← Vorheriger</button>
+            <button id="deleteBtn" class="danger">Löschen</button>
+            <button id="nextBtn">Nächster →</button>
+        </div>
+
+        <div class="document-container">
+            <div class="section header">
+                <h2>Header</h2>
+                <div class="content">
+                    <p><strong>Created:</strong> <span id="created"></span>
+                       <strong>Model:</strong> <span id="model"></span>
+                       <strong>Prompt:</strong> <span id="prompt"></span></p>
+                </div>
+            </div>
+
+            <div class="section question">
+                <h2>Question</h2>
+                <div class="content">
+                    <p><strong>Category:</strong> <span id="category"></span>
+                       <strong>Subcategory:</strong> <span id="subcategory"></span>
+                       <strong>Type:</strong> <span id="type"></span>
+                       <strong>Complexity:</strong> <span id="complexity"></span></p>
+
+                    <p><strong>Tags:</strong> <span id="tags"></span></p>
+                    <p><strong>Relation:</strong> <span id="relation"></span>
+                       <strong>Abstraction Level:</strong> <span id="abstraction_level"></span></p>
+                    <p><strong>Main Goal:</strong> <span id="main_goal"></span></p>
+                    <p><strong>Context:</strong> <span id="context"></span></p>
+                    <p><strong>Expected Output:</strong> <span id="expected_output"></span></p>
+                    <p><strong>Generic Query:</strong> <span id="generic_query"></span></p>
+                </div>
+            </div>
+
+            <div class="section answer">
+                <h2>Answer</h2>
+                <div class="content">
+                    <div id="message_content"></div>
+                    <p><strong>Hauptthemen:</strong> <span id="hauptthemen"></span></p>
+                    <p><strong>Theologische Konzepte:</strong> <span id="theologische_konzepte"></span></p>
+                    <p><strong>Bibelreferenzen:</strong> <span id="bibelreferenzen"></span></p>
+                    <p><strong>Historischer Kontext:</strong> <span id="historischer_kontext"></span></p>
+                    <p><strong>Zentrale Personen:</strong> <span id="zentrale_personen"></span></p>
+                </div>
+            </div>
+
+            <div class="section feedback">
+                <h2>Feedback</h2>
+                <div class="content">
+                    <p id="rating"></p>
+                    <p id="free_text"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
