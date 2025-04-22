@@ -1,0 +1,15 @@
+app = "ama-b-viewer"
+
+[build]
+  image = "Dockerfile"
+
+[env]
+  FLASK_DEBUG = "False"
+
+[[services]]
+  internal_port = 5000
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80

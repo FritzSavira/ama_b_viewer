@@ -91,4 +91,5 @@ def delete_document(id):
 
 if __name__ == '__main__':
     # Enable debug mode only in the development environment
-    app.run(debug=os.environ.get('FLASK_DEBUG', 'False').lower() == 'true')
+    port = int(os.environ.get('PORT', 5000))  # Use PORT environment variable or default to 5000
+    app.run(host='0.0.0.0', port=port, debug=os.environ.get('FLASK_DEBUG', 'False').lower() == 'true')
