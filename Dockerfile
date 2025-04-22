@@ -1,5 +1,9 @@
 # Use the official Python image
-FROM python:3.9-slim
+FROM python:3.11-slim
+
+# Set environment variables for Python
+ENV PYTHONDONTWRITEBYTECODE=1  # Prevent Python from writing .pyc files
+ENV PYTHONUNBUFFERED=1        # Ensure output is logged in real-time
 
 # Set the working directory
 WORKDIR /app
