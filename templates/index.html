@@ -44,15 +44,52 @@
         .navigation .danger {
             background-color: #dc3545;
         }
-        .section {
+        .tab-navigation {
+            display: flex;
             margin-bottom: 20px;
+            border-bottom: 2px solid #dee2e6;
         }
-        .content p {
-            margin: 5px 0;
-            line-height: 1.6;
+        .tab-navigation a {
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.3s ease;
         }
-        strong {
+        .tab-navigation a:hover {
+            border-bottom-color: #007bff;
+        }
+        .tab-navigation a.active {
+            border-bottom-color: #0056b3;
+            color: #0056b3;
+        }
+        .document-container {
+            padding-top: 10px;
+        }
+        .field {
+            margin-bottom: 12px;
+            border-left: 3px solid #dee2e6;
+            padding-left: 15px;
+        }
+        .field-key {
+            font-weight: bold;
             color: #495057;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .field-value {
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .nested-dict {
+            margin-left: 20px;
+            border-left: 3px solid #ced4da;
+            padding-left: 15px;
+            margin-top: 10px;
         }
         .error {
             color: #dc3545;
@@ -72,61 +109,87 @@
             </div>
         {% elif doc %}
             <div class="navigation">
-                <a href="{{ url_for('get_previous', id=doc['_id']) }}">← Vorheriger</a>
+                <a href="{{ url_for('get_previous', id=doc['_id'], show=show) }}">← Vorheriger</a>
                 <form action="{{ url_for('delete_document', id=doc['_id']) }}" method="post" onsubmit="return confirm('Datensatz wirklich löschen?');">
                     <button type="submit" class="danger">Löschen</button>
                 </form>
-                <a href="{{ url_for('get_next', id=doc['_id']) }}">Nächster →</a>
+                <a href="{{ url_for('get_next', id=doc['_id'], show=show) }}">Nächster →</a>
+            </div>
+
+            <div class="tab-navigation">
+                <a href="{{ url_for('view_document', id=doc['_id'], show='all') }}" class="{{ 'active' if show == 'all' else '' }}">All</a>
+                <a href="{{ url_for('view_document', id=doc['_id'], show='question') }}" class="{{ 'active' if show == 'question' else '' }}">Question</a>
+                <a href="{{ url_for('view_document', id=doc['_id'], show='answer') }}" class="{{ 'active' if show == 'answer' else '' }}">Answer</a>
+                <a href="{{ url_for('view_document', id=doc['_id'], show='tags') }}" class="{{ 'active' if show == 'tags' else '' }}">Tags</a>
             </div>
 
             <div class="document-container">
-                <div class="section header">
-                    <h2>Header</h2>
-                    <div class="content">
-                        <p><strong>Created:</strong> {{ doc.get('created', 'N/A') }}</p>
-                        <p><strong>Model:</strong> {{ doc.get('model', 'N/A') }}</p>
-                        <p><strong>Prompt:</strong> {{ doc.get('prompt', 'N/A') }}</p>
-                    </div>
-                </div>
+                {# Macro to recursively display dictionary items #}
+                {% macro display_dict(d) %}
+                    {% for key, value in d.items() %}
+                        {% if key != '_id' %}
+                            <div class="field">
+                                <span class="field-key">{{ key }}</span>
+                                {% if value is mapping %}
+                                    <div class="nested-dict">
+                                        {{ display_dict(value) }}
+                                    </div>
+                                {% elif value is iterable and value is not string %}
+                                    <div class="field-value">
+                                        <ul>
+                                        {% for item in value %}
+                                            <li>{{ item }}</li>
+                                        {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class="field-value">{{ value }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endmacro %}
 
-                <div class="section question">
-                    <h2>Question</h2>
-                    <div class="content">
-                        <p><strong>Category:</strong> {{ doc.get('question', {}).get('category', 'N/A') }}</p>
-                        <p><strong>Subcategory:</strong> {{ doc.get('question', {}).get('subcategory', 'N/A') }}</p>
-                        <p><strong>Type:</strong> {{ doc.get('question', {}).get('type', 'N/A') }}</p>
-                        <p><strong>Complexity:</strong> {{ doc.get('question', {}).get('complexity', 'N/A') }}</p>
-                        <p><strong>Tags:</strong> {{ doc.get('question', {}).get('tags', [])|join(', ') }}</p>
-                        <p><strong>Relation:</strong> {{ doc.get('question', {}).get('relation', 'N/A') }}</p>
-                        <p><strong>Abstraction Level:</strong> {{ doc.get('question', {}).get('abstraction_level', 'N/A') }}</p>
-                        <p><strong>Main Goal:</strong> {{ doc.get('question', {}).get('main_goal', 'N/A') }}</p>
-                        <p><strong>Context:</strong> {{ doc.get('question', {}).get('context', 'N/A') }}</p>
-                        <p><strong>Expected Output:</strong> {{ doc.get('question', {}).get('expected_output', 'N/A') }}</p>
-                        <p><strong>Generic Query:</strong> {{ doc.get('question', {}).get('generic_query', 'N/A') }}</p>
-                    </div>
-                </div>
-
-                <div class="section answer">
-                    <h2>Answer</h2>
-                    <div class="content">
-                        <p><strong>Message Content:</strong></p>
-                        <div>{{ doc.get('answer', {}).get('message_content', 'N/A') }}</div>
-                        <p><strong>Hauptthemen:</strong> {{ doc.get('answer', {}).get('hauptthemen', [])|join(', ') }}</p>
-                        <p><strong>Theologische Konzepte:</strong> {{ doc.get('answer', {}).get('theologische_konzepte', [])|join(', ') }}</p>
-                        <p><strong>Bibelreferenzen:</strong> {{ doc.get('answer', {}).get('bibelreferenzen', [])|join(', ') }}</p>
-                        <p><strong>Historischer Kontext:</strong> {{ doc.get('answer', {}).get('historischer_kontext', 'N/A') }}</p>
-                        <p><strong>Zentrale Personen:</strong> {{ doc.get('answer', {}).get('zentrale_personen', [])|join(', ') }}</p>
-                    </div>
-                </div>
-
-                <div class="section feedback">
-                    <h2>Feedback</h2>
-                    <div class="content">
-                        <p><strong>Rating:</strong> {{ doc.get('feedback', {}).get('rating', 'N/A') }}</p>
-                        <p><strong>Free Text:</strong> {{ doc.get('feedback', {}).get('free_text', 'N/A') }}</p>
-                    </div>
-                </div>
+                {% if show == 'all' %}
+                    {{ display_dict(doc) }}
+                {% elif show == 'question' %}
+                    {% if doc.question %}
+                        {{ display_dict(doc.question) }}
+                    {% else %}
+                        <p>No question data available for this document.</p>
+                    {% endif %}
+                {% elif show == 'answer' %}
+                    {% if doc.answer %}
+                        {{ display_dict(doc.answer) }}
+                    {% else %}
+                        <p>No answer data available for this document.</p>
+                    {% endif %}
+                {% elif show == 'tags' %}
+                    {# Logic to extract and display tags #}
+                    {% set all_tags = [] %}
+                    {% for key, value in doc.items() %}
+                        {% if value is iterable and value is not string %}
+                            {% for item in value %}
+                                {% if item is string %}
+                                    {% set _ = all_tags.append(item) %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if all_tags %}
+                        <div class="field-value">
+                            <ul>
+                            {% for tag in all_tags %}
+                                <li>{{ tag }}</li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    {% else %}
+                        <p>No tags found in this document.</p>
+                    {% endif %}
+                {% endif %}
             </div>
+
         {% else %}
             <div class="error">
                 <p>Keine Dokumente in der Datenbank gefunden.</p>
