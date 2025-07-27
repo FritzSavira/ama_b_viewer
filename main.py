@@ -128,7 +128,6 @@ def get_previous(id):
             return redirect(url_for('view_document', id=str(prev_doc['_id']), show=show_view))
         return redirect(url_for('view_document', id=id, show=show_view)) # Stay on the same page if no previous
     except Exception as e:
-        except Exception as e:
         return render_template('index.html', doc=None, error=f"Error finding previous record: {e}", new_fields=new_fields_on_startup, show=show_view)
 
 @app.route('/next/<id>')
@@ -145,7 +144,6 @@ def get_next(id):
             return redirect(url_for('view_document', id=str(next_doc['_id']), show=show_view))
         return redirect(url_for('view_document', id=id, show=show_view)) # Stay on the same page if no next
     except Exception as e:
-        except Exception as e:
         return render_template('index.html', doc=None, error=f"Error finding next record: {e}", new_fields=new_fields_on_startup, show=show_view)
 
 @app.route('/delete/<id>', methods=['POST'])
