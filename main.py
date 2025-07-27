@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, url_for
 from pymongo import MongoClient
 from bson import ObjectId
 import os
@@ -32,23 +32,29 @@ def format_document(doc):
 
 @app.route('/')
 def index():
-    """Renders the main page."""
-    return render_template('index.html')
-
-@app.route('/api/latest')
-def get_latest():
-    """Returns the latest record."""
+    """Renders the main page with the latest document."""
     try:
         latest_doc = collection.find_one(sort=[('_id', -1)])
         if latest_doc:
-            return jsonify(format_document(latest_doc))
-        return jsonify({"error": "No records found"}), 404
+            return render_template('index.html', doc=format_document(latest_doc))
+        return render_template('index.html', doc=None, error="No records found")
     except Exception as e:
-        return jsonify({"error": f"Error retrieving the latest record: {e}"}), 500
+        return render_template('index.html', doc=None, error=f"Error retrieving the latest record: {e}")
 
-@app.route('/api/previous/<id>')
+@app.route('/view/<id>')
+def view_document(id):
+    """Renders the page with a specific document."""
+    try:
+        doc = collection.find_one({'_id': ObjectId(id)})
+        if doc:
+            return render_template('index.html', doc=format_document(doc))
+        return render_template('index.html', doc=None, error="Record not found")
+    except Exception as e:
+        return render_template('index.html', doc=None, error=f"Error retrieving the record: {e}")
+
+@app.route('/previous/<id>')
 def get_previous(id):
-    """Returns the previous record based on the ID."""
+    """Redirects to the previous record."""
     try:
         current_id = ObjectId(id)
         prev_doc = collection.find_one(
@@ -56,14 +62,14 @@ def get_previous(id):
             sort=[('_id', -1)]
         )
         if prev_doc:
-            return jsonify(format_document(prev_doc))
-        return jsonify({"error": "No previous record found"}), 404
+            return redirect(url_for('view_document', id=str(prev_doc['_id'])))
+        return redirect(url_for('view_document', id=id)) # Stay on the same page if no previous
     except Exception as e:
-        return jsonify({"error": f"Error retrieving the previous record: {e}"}), 400
+        return render_template('index.html', doc=None, error=f"Error finding previous record: {e}")
 
-@app.route('/api/next/<id>')
+@app.route('/next/<id>')
 def get_next(id):
-    """Returns the next record based on the ID."""
+    """Redirects to the next record."""
     try:
         current_id = ObjectId(id)
         next_doc = collection.find_one(
@@ -71,23 +77,20 @@ def get_next(id):
             sort=[('_id', 1)]
         )
         if next_doc:
-            return jsonify(format_document(next_doc))
-        return jsonify({"error": "No next record found"}), 404
+            return redirect(url_for('view_document', id=str(next_doc['_id'])))
+        return redirect(url_for('view_document', id=id)) # Stay on the same page if no next
     except Exception as e:
-        return jsonify({"error": f"Error retrieving the next record: {e}"}), 400
+        return render_template('index.html', doc=None, error=f"Error finding next record: {e}")
 
-@app.route('/api/delete/<id>', methods=['DELETE'])
+@app.route('/delete/<id>', methods=['POST'])
 def delete_document(id):
-    """Deletes a record based on the ID."""
+    """Deletes a record and redirects to the latest one."""
     try:
         current_id = ObjectId(id)
-        result = collection.delete_one({"_id": current_id})
-
-        if result.deleted_count > 0:
-            return jsonify({"success": True, "message": "Record successfully deleted"})
-        return jsonify({"error": "Record not found"}), 404
+        collection.delete_one({"_id": current_id})
+        return redirect(url_for('index'))
     except Exception as e:
-        return jsonify({"error": f"Error deleting the record: {e}"}), 400
+        return render_template('index.html', doc=None, error=f"Error deleting the record: {e}")
 
 if __name__ == '__main__':
     # Enable debug mode only in the development environment

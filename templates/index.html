@@ -4,69 +4,134 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MongoDB Datensatz Viewer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .navigation a, .navigation button {
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            cursor: pointer;
+        }
+        .navigation .danger {
+            background-color: #dc3545;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .content p {
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+        strong {
+            color: #495057;
+        }
+        .error {
+            color: #dc3545;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>MongoDB Datensatz Viewer</h1>
 
-        <div class="navigation">
-            <button id="prevBtn">← Vorheriger</button>
-            <button id="deleteBtn" class="danger">Löschen</button>
-            <button id="nextBtn">Nächster →</button>
-        </div>
-
-        <div class="document-container">
-            <div class="section header">
-                <h2>Header</h2>
-                <div class="content">
-                    <p><strong>Created:</strong> <span id="created"></span>
-                       <strong>Model:</strong> <span id="model"></span>
-                       <strong>Prompt:</strong> <span id="prompt"></span></p>
-                </div>
+        {% if error %}
+            <div class="error">
+                <h2>Fehler</h2>
+                <p>{{ error }}</p>
+            </div>
+        {% elif doc %}
+            <div class="navigation">
+                <a href="{{ url_for('get_previous', id=doc['_id']) }}">← Vorheriger</a>
+                <form action="{{ url_for('delete_document', id=doc['_id']) }}" method="post" onsubmit="return confirm('Datensatz wirklich löschen?');">
+                    <button type="submit" class="danger">Löschen</button>
+                </form>
+                <a href="{{ url_for('get_next', id=doc['_id']) }}">Nächster →</a>
             </div>
 
-            <div class="section question">
-                <h2>Question</h2>
-                <div class="content">
-                    <p><strong>Category:</strong> <span id="category"></span>
-                       <strong>Subcategory:</strong> <span id="subcategory"></span>
-                       <strong>Type:</strong> <span id="type"></span>
-                       <strong>Complexity:</strong> <span id="complexity"></span></p>
+            <div class="document-container">
+                <div class="section header">
+                    <h2>Header</h2>
+                    <div class="content">
+                        <p><strong>Created:</strong> {{ doc.get('created', 'N/A') }}</p>
+                        <p><strong>Model:</strong> {{ doc.get('model', 'N/A') }}</p>
+                        <p><strong>Prompt:</strong> {{ doc.get('prompt', 'N/A') }}</p>
+                    </div>
+                </div>
 
-                    <p><strong>Tags:</strong> <span id="tags"></span></p>
-                    <p><strong>Relation:</strong> <span id="relation"></span>
-                       <strong>Abstraction Level:</strong> <span id="abstraction_level"></span></p>
-                    <p><strong>Main Goal:</strong> <span id="main_goal"></span></p>
-                    <p><strong>Context:</strong> <span id="context"></span></p>
-                    <p><strong>Expected Output:</strong> <span id="expected_output"></span></p>
-                    <p><strong>Generic Query:</strong> <span id="generic_query"></span></p>
+                <div class="section question">
+                    <h2>Question</h2>
+                    <div class="content">
+                        <p><strong>Category:</strong> {{ doc.question.get('category', 'N/A') }}</p>
+                        <p><strong>Subcategory:</strong> {{ doc.question.get('subcategory', 'N/A') }}</p>
+                        <p><strong>Type:</strong> {{ doc.question.get('type', 'N/A') }}</p>
+                        <p><strong>Complexity:</strong> {{ doc.question.get('complexity', 'N/A') }}</p>
+                        <p><strong>Tags:</strong> {{ doc.question.get('tags', [])|join(', ') }}</p>
+                        <p><strong>Relation:</strong> {{ doc.question.get('relation', 'N/A') }}</p>
+                        <p><strong>Abstraction Level:</strong> {{ doc.question.get('abstraction_level', 'N/A') }}</p>
+                        <p><strong>Main Goal:</strong> {{ doc.question.get('main_goal', 'N/A') }}</p>
+                        <p><strong>Context:</strong> {{ doc.question.get('context', 'N/A') }}</p>
+                        <p><strong>Expected Output:</strong> {{ doc.question.get('expected_output', 'N/A') }}</p>
+                        <p><strong>Generic Query:</strong> {{ doc.question.get('generic_query', 'N/A') }}</p>
+                    </div>
+                </div>
+
+                <div class="section answer">
+                    <h2>Answer</h2>
+                    <div class="content">
+                        <p><strong>Message Content:</strong></p>
+                        <div>{{ doc.answer.get('message_content', 'N/A') }}</div>
+                        <p><strong>Hauptthemen:</strong> {{ doc.answer.get('hauptthemen', [])|join(', ') }}</p>
+                        <p><strong>Theologische Konzepte:</strong> {{ doc.answer.get('theologische_konzepte', [])|join(', ') }}</p>
+                        <p><strong>Bibelreferenzen:</strong> {{ doc.answer.get('bibelreferenzen', [])|join(', ') }}</p>
+                        <p><strong>Historischer Kontext:</strong> {{ doc.answer.get('historischer_kontext', 'N/A') }}</p>
+                        <p><strong>Zentrale Personen:</strong> {{ doc.answer.get('zentrale_personen', [])|join(', ') }}</p>
+                    </div>
+                </div>
+
+                <div class="section feedback">
+                    <h2>Feedback</h2>
+                    <div class="content">
+                        <p><strong>Rating:</strong> {{ doc.feedback.get('rating', 'N/A') }}</p>
+                        <p><strong>Free Text:</strong> {{ doc.feedback.get('free_text', 'N/A') }}</p>
+                    </div>
                 </div>
             </div>
-
-            <div class="section answer">
-                <h2>Answer</h2>
-                <div class="content">
-                    <div id="message_content"></div>
-                    <p><strong>Hauptthemen:</strong> <span id="hauptthemen"></span></p>
-                    <p><strong>Theologische Konzepte:</strong> <span id="theologische_konzepte"></span></p>
-                    <p><strong>Bibelreferenzen:</strong> <span id="bibelreferenzen"></span></p>
-                    <p><strong>Historischer Kontext:</strong> <span id="historischer_kontext"></span></p>
-                    <p><strong>Zentrale Personen:</strong> <span id="zentrale_personen"></span></p>
-                </div>
+        {% else %}
+            <div class="error">
+                <p>Keine Dokumente in der Datenbank gefunden.</p>
             </div>
-
-            <div class="section feedback">
-                <h2>Feedback</h2>
-                <div class="content">
-                    <p id="rating"></p>
-                    <p id="free_text"></p>
-                </div>
-            </div>
-        </div>
+        {% endif %}
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 </html>
