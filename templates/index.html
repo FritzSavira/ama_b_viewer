@@ -92,17 +92,17 @@
                 <div class="section question">
                     <h2>Question</h2>
                     <div class="content">
-                        <p><strong>Category:</strong> {{ doc.question.get('category', 'N/A') }}</p>
-                        <p><strong>Subcategory:</strong> {{ doc.question.get('subcategory', 'N/A') }}</p>
-                        <p><strong>Type:</strong> {{ doc.question.get('type', 'N/A') }}</p>
-                        <p><strong>Complexity:</strong> {{ doc.question.get('complexity', 'N/A') }}</p>
-                        <p><strong>Tags:</strong> {{ doc.question.get('tags', [])|join(', ') }}</p>
-                        <p><strong>Relation:</strong> {{ doc.question.get('relation', 'N/A') }}</p>
-                        <p><strong>Abstraction Level:</strong> {{ doc.question.get('abstraction_level', 'N/A') }}</p>
-                        <p><strong>Main Goal:</strong> {{ doc.question.get('main_goal', 'N/A') }}</p>
-                        <p><strong>Context:</strong> {{ doc.question.get('context', 'N/A') }}</p>
-                        <p><strong>Expected Output:</strong> {{ doc.question.get('expected_output', 'N/A') }}</p>
-                        <p><strong>Generic Query:</strong> {{ doc.question.get('generic_query', 'N/A') }}</p>
+                        <p><strong>Category:</strong> {{ doc.get('question', {}).get('category', 'N/A') }}</p>
+                        <p><strong>Subcategory:</strong> {{ doc.get('question', {}).get('subcategory', 'N/A') }}</p>
+                        <p><strong>Type:</strong> {{ doc.get('question', {}).get('type', 'N/A') }}</p>
+                        <p><strong>Complexity:</strong> {{ doc.get('question', {}).get('complexity', 'N/A') }}</p>
+                        <p><strong>Tags:</strong> {{ doc.get('question', {}).get('tags', [])|join(', ') }}</p>
+                        <p><strong>Relation:</strong> {{ doc.get('question', {}).get('relation', 'N/A') }}</p>
+                        <p><strong>Abstraction Level:</strong> {{ doc.get('question', {}).get('abstraction_level', 'N/A') }}</p>
+                        <p><strong>Main Goal:</strong> {{ doc.get('question', {}).get('main_goal', 'N/A') }}</p>
+                        <p><strong>Context:</strong> {{ doc.get('question', {}).get('context', 'N/A') }}</p>
+                        <p><strong>Expected Output:</strong> {{ doc.get('question', {}).get('expected_output', 'N/A') }}</p>
+                        <p><strong>Generic Query:</strong> {{ doc.get('question', {}).get('generic_query', 'N/A') }}</p>
                     </div>
                 </div>
 
@@ -110,20 +110,20 @@
                     <h2>Answer</h2>
                     <div class="content">
                         <p><strong>Message Content:</strong></p>
-                        <div>{{ doc.answer.get('message_content', 'N/A') }}</div>
-                        <p><strong>Hauptthemen:</strong> {{ doc.answer.get('hauptthemen', [])|join(', ') }}</p>
-                        <p><strong>Theologische Konzepte:</strong> {{ doc.answer.get('theologische_konzepte', [])|join(', ') }}</p>
-                        <p><strong>Bibelreferenzen:</strong> {{ doc.answer.get('bibelreferenzen', [])|join(', ') }}</p>
-                        <p><strong>Historischer Kontext:</strong> {{ doc.answer.get('historischer_kontext', 'N/A') }}</p>
-                        <p><strong>Zentrale Personen:</strong> {{ doc.answer.get('zentrale_personen', [])|join(', ') }}</p>
+                        <div>{{ doc.get('answer', {}).get('message_content', 'N/A') }}</div>
+                        <p><strong>Hauptthemen:</strong> {{ doc.get('answer', {}).get('hauptthemen', [])|join(', ') }}</p>
+                        <p><strong>Theologische Konzepte:</strong> {{ doc.get('answer', {}).get('theologische_konzepte', [])|join(', ') }}</p>
+                        <p><strong>Bibelreferenzen:</strong> {{ doc.get('answer', {}).get('bibelreferenzen', [])|join(', ') }}</p>
+                        <p><strong>Historischer Kontext:</strong> {{ doc.get('answer', {}).get('historischer_kontext', 'N/A') }}</p>
+                        <p><strong>Zentrale Personen:</strong> {{ doc.get('answer', {}).get('zentrale_personen', [])|join(', ') }}</p>
                     </div>
                 </div>
 
                 <div class="section feedback">
                     <h2>Feedback</h2>
                     <div class="content">
-                        <p><strong>Rating:</strong> {{ doc.feedback.get('rating', 'N/A') }}</p>
-                        <p><strong>Free Text:</strong> {{ doc.feedback.get('free_text', 'N/A') }}</p>
+                        <p><strong>Rating:</strong> {{ doc.get('feedback', {}).get('rating', 'N/A') }}</p>
+                        <p><strong>Free Text:</strong> {{ doc.get('feedback', {}).get('free_text', 'N/A') }}</p>
                     </div>
                 </div>
             </div>
