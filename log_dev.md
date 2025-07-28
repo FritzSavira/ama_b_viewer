@@ -1,5 +1,19 @@
 # Development Log
 
+## 2025-07-28 - Fix: Prevent Server Shutdown Error on Windows
+
+### Overview
+Fixed a `[WinError 10038]` crash that occurred when stopping the Flask development server on Windows. This error is caused by a race condition in the server's auto-reloader.
+
+### Key Changes & Rationale
+
+1.  **`main.py` Modifications:**
+    *   The `app.run()` call was modified to `app.run(debug=True, use_reloader=False)`.
+    *   **Reasoning:** Disabling the auto-reloader (`use_reloader=False`) is the most direct way to prevent the race condition that leads to the socket error on shutdown. While this requires manual server restarts during development, it provides a stable and error-free exit, which is preferable to the confusing crash log.
+
+### Files Modified
+*   `main.py`
+
 ## 2025-07-28 - Refactor: Improved Answer View Logic
 
 ### Overview

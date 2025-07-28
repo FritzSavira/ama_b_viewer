@@ -128,7 +128,7 @@ def previous_document(id):
         return "No previous document", 404
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
 
 
 
