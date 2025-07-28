@@ -176,6 +176,9 @@
         <a href="{{ url_for('view_document', id=doc._id, show='answer') }}" class="{{ 'active' if show == 'answer' else '' }}">Answer</a>
         <a href="{{ url_for('view_document', id=doc._id, show='tags') }}" class="{{ 'active' if show == 'tags' else '' }}">Tags</a>
         <a href="{{ url_for('view_document', id=doc._id, show='all') }}" class="{{ 'active' if show == 'all' else '' }}">All</a>
+        <a href="{{ url_for('questions_dashboard') }}">Questions Dashboard</a>
+        <a href="{{ url_for('tags_dashboard') }}">Tags Dashboard</a>
+        <a href="{{ url_for('network_graph_view') }}">Network Graph</a>
     </nav>
 
     {% block content %}

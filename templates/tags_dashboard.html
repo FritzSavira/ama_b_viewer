@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tag-Analyse (Häufigkeit)</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 20px;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Tag-Analyse (Häufigkeit)</h1>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Bibelreferenzen</h2>
+                <div class="chart-container">
+                    <canvas id="bibelreferenzenChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h2>Hauptthemen</h2>
+                <div class="chart-container">
+                    <canvas id="hauptthemenChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h2>Theologische Konzepte</h2>
+                <div class="chart-container">
+                    <canvas id="theologischeKonzepteChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <a href="/" class="btn btn-primary mt-4">Zurück zur Startseite</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to create a bar chart
+            function createBarChart(ctxId, title, chartData, limit = 10) { // limit Parameter hinzugefügt
+                // Limit categories based on the provided limit
+                const limitedData = chartData.slice(0, limit);
+                const labels = limitedData.map(item => item._id);
+                const counts = limitedData.map(item => item.count);
+
+                const ctx = document.getElementById(ctxId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `Anzahl (Top ${limit} Tags)`, // Legende angepasst
+                            data: counts,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: title
+                            },
+                            legend: {
+                                display: true
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Fetch data for Bibelreferenzen
+            fetch('/api/tag_frequency/bibelreferenzen')
+                .then(response => response.json())
+                .then(data => {
+                    createBarChart('bibelreferenzenChart', 'Häufigkeit der Bibelreferenzen', data, 20); // Limit auf 20 gesetzt
+                })
+                .catch(error => console.error('Error fetching Bibelreferenzen data:', error));
+
+            // Fetch data for Hauptthemen
+            fetch('/api/tag_frequency/hauptthemen')
+                .then(response => response.json())
+                .then(data => {
+                    createBarChart('hauptthemenChart', 'Häufigkeit der Hauptthemen', data); // Standardlimit 10
+                })
+                .catch(error => console.error('Error fetching Hauptthemen data:', error));
+
+            // Fetch data for Theologische Konzepte
+            fetch('/api/tag_frequency/theologische_konzepte')
+                .then(response => response.json())
+                .then(data => {
+                    createBarChart('theologischeKonzepteChart', 'Häufigkeit der Theologischen Konzepte', data); // Standardlimit 10
+                })
+                .catch(error => console.error('Error fetching Theologische Konzepte data:', error));
+        });
+    </script>
+</body>
+</html>

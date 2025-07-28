@@ -181,6 +181,153 @@ def previous_document(id):
     else:
         return "No previous document", 404
 
+def _aggregate_field(field_path):
+    pipeline = [
+        {
+            "$match": {
+                field_path: {"$exists": True, "$ne": None, "$ne": ""}
+            }
+        },
+        {
+            "$group": {
+                "_id": f"${field_path}",
+                "count": {"$sum": 1}
+            }
+        },
+        {
+            "$sort": {
+                "count": -1
+            }
+        }
+    ]
+    return list(collection.aggregate(pipeline))
+
+@app.route('/api/questions_categorization')
+def get_questions_categorization():
+    data = {
+        "category": _aggregate_field("question_abstraction.categorization.category"),
+        "subcategory": _aggregate_field("question_abstraction.categorization.subcategory"),
+        "type": _aggregate_field("question_abstraction.categorization.type"),
+        "complexity": _aggregate_field("question_abstraction.categorization.complexity"),
+        "main_goal": _aggregate_field("question_abstraction.intent.main_goal"),
+        "information_goal": _aggregate_field("question_abstraction.semantic.information_goal"),
+        "domain": _aggregate_field("question_abstraction.semantic.domain")
+    }
+    return jsonify(data)
+
+@app.route('/api/tag_frequency/<tag_type>')
+def get_tag_frequency(tag_type):
+    valid_tag_types = ["bibelreferenzen", "hauptthemen", "theologische_konzepte"]
+    if tag_type not in valid_tag_types:
+        return jsonify({"error": "Invalid tag type. Valid types are: " + ", ".join(valid_tag_types)}), 400
+
+    field_path = f"tags.{tag_type}"
+
+    pipeline = [
+        {
+            "$match": {
+                field_path: {"$exists": True, "$ne": [], "$ne": None}
+            }
+        },
+        {
+            "$unwind": f"${field_path}"
+        },
+        {
+            "$group": {
+                "_id": f"${field_path}",
+                "count": {"$sum": 1}
+            }
+        },
+        {
+            "$sort": {
+                "count": -1
+            }
+        }
+    ]
+    results = list(collection.aggregate(pipeline))
+    return jsonify(results)
+
+def generate_network_data():
+    # Aggregation to get the links (edges) and their counts
+    links_pipeline = [
+        {
+            "$match": {
+                "tags.bibelreferenzen": {"$exists": True, "$ne": []},
+                "tags.hauptthemen": {"$exists": True, "$ne": []}
+            }
+        },
+        {
+            "$unwind": "$tags.bibelreferenzen"
+        },
+        {
+            "$unwind": "$tags.hauptthemen"
+        },
+        {
+            "$group": {
+                "_id": {
+                    "source": "$tags.bibelreferenzen",
+                    "target": "$tags.hauptthemen"
+                },
+                "value": {"$sum": 1}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "source": "$_id.source",
+                "target": "$_id.target",
+                "value": "$value"
+            }
+        }
+    ]
+    links_data = list(collection.aggregate(links_pipeline))
+
+    # Extract unique nodes from the links data
+    nodes_set = set()
+    for link in links_data:
+        nodes_set.add((link['source'], 'bibelreferenz'))
+        nodes_set.add((link['target'], 'hauptthema'))
+
+    nodes_data = []
+    for node_id, node_type in nodes_set:
+        nodes_data.append({"id": node_id, "type": node_type})
+
+    return {"nodes": nodes_data, "links": links_data}
+
+def update_network_cache():
+    network_data = generate_network_data()
+    cache_collection = db["ama_log_network_cache"]
+    # Clear existing cache and insert new data
+    cache_collection.delete_many({})
+    cache_collection.insert_one({"_id": "network_data", "data": network_data})
+    return True
+
+@app.route('/api/update_network_cache')
+def trigger_update_network_cache():
+    update_network_cache()
+    return jsonify({"message": "Network cache updated successfully."})
+
+@app.route('/api/bible_theme_network')
+def bible_theme_network():
+    cache_collection = db["ama_log_network_cache"]
+    cached_data = cache_collection.find_one({"_id": "network_data"})
+    if cached_data and "data" in cached_data:
+        return jsonify(cached_data["data"])
+    else:
+        return jsonify({"error": "Network data not found in cache. Please run /api/update_network_cache first."}), 404
+
+@app.route('/questions_dashboard')
+def questions_dashboard():
+    return render_template('questions_dashboard.html')
+
+@app.route('/tags_dashboard')
+def tags_dashboard():
+    return render_template('tags_dashboard.html')
+
+@app.route('/network_graph_view')
+def network_graph_view():
+    return render_template('bible_theme_network.html')
+
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
 
