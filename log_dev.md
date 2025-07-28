@@ -1,5 +1,49 @@
 # Development Log
 
+## 2025-07-28 - Feature: Dynamic Page Title
+
+### Overview
+Changed the page title displayed on each document view from the generic Document ID to a more descriptive "Fragestellung: [Information Goal]" from the `question_abstraction` field. This enhances user context and navigation.
+
+### Key Changes & Rationale
+
+1.  **`main.py` Modifications:**
+    *   The `view_document` function now safely attempts to extract `doc.question_abstraction.semantic.information_goal`.
+    *   If found, the `page_title` is set to "Fragestellung: " followed by the information goal. Otherwise, it defaults back to "Document ID: [ID]".
+    *   This `page_title` is passed to the template context.
+
+2.  **`templates/base.html` Modifications:**
+    *   The `<h1>` tag was updated to display the `page_title` variable, ensuring the dynamic title is rendered.
+
+### Files Modified
+*   `main.py`
+*   `templates/base.html`
+
+## 2025-07-28 - Feature: Render Markdown in Answer View
+
+### Overview
+Implemented Markdown rendering for the "Answer" view to display formatted text instead of raw source. This provides a more readable and user-friendly experience, consistent with the rest of the application's UI/UX.
+
+### Key Changes & Rationale
+
+1.  **Dependency Management (`requirements.txt`):**
+    *   Added the `Markdown` library to `requirements.txt` to formally include it as a project dependency.
+
+2.  **Backend Refactoring (`main.py`):**
+    *   The `get_answer_content` helper function was updated to use the `markdown` library. It now converts the Markdown text from the database into an HTML string before passing it to the template. This follows the "Separation of Concerns" principle, keeping data processing in the backend.
+
+3.  **Frontend Template Update (`index.html`):**
+    *   The "Answer" view block now uses a `<div>` and the `|safe` Jinja2 filter (`{{ answer_content | safe }}`). This ensures the pre-formatted HTML from the backend is rendered correctly instead of being escaped.
+
+4.  **Centralized Styling (`base.html`):**
+    *   Added a `.rendered-markdown` CSS class with styles for common HTML elements (headings, lists, code blocks). This ensures that any Markdown content rendered across the application will have a consistent and polished look, improving the overall UI/UX.
+
+### Files Modified
+*   `requirements.txt`
+*   `main.py`
+*   `templates/index.html`
+*   `templates/base.html`
+
 ## 2025-07-28 - Fix: Prevent Server Shutdown Error on Windows
 
 ### Overview

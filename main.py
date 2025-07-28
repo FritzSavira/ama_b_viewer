@@ -62,12 +62,15 @@ def get_collection_schema(collection):
 def index():
     return redirect(url_for('view_document', id=collection.find_one()['_id']))
 
+import markdown
+
 def get_answer_content(doc):
-    """Safely retrieves the answer content from the nested document structure."""
+    """Safely retrieves the answer content and converts it from Markdown to HTML."""
     try:
-        return doc['reply']['completion']['choices'][0]['message']['content']
+        markdown_content = doc['reply']['completion']['choices'][0]['message']['content']
+        return markdown.markdown(markdown_content, extensions=['fenced_code', 'tables'])
     except (KeyError, IndexError, TypeError):
-        return "Answer content not found at the expected path (reply.completion.choices[0].message.content)."
+        return "<p>Answer content not found at the expected path (reply.completion.choices[0].message.content).</p>"
 
 @app.route('/view/<id>')
 def view_document(id):
@@ -83,13 +86,26 @@ def view_document(id):
     first_doc_id = first_doc['_id'] if first_doc else None
     last_doc_id = last_doc['_id'] if last_doc else None
 
+    # --- Prepare Page Title --- #
+    # Safely get the information_goal for a more descriptive page title.
+    page_title = "Document ID: " + str(doc.get('_id')) # Default title
+    try:
+        # Attempt to get the more descriptive title
+        info_goal = doc['question_abstraction']['semantic']['information_goal']
+        if info_goal:
+            page_title = "Fragestellung: " + info_goal
+    except (KeyError, TypeError):
+        # If the path doesn't exist or is not a dict, the default title is used.
+        pass
+
     # Prepare template context
     template_context = {
         'doc': doc,
         'show': show_view,
         'first_doc_id': first_doc_id,
         'last_doc_id': last_doc_id,
-        'answer_content': None  # Default to None
+        'answer_content': None,  # Default to None
+        'page_title': page_title
     }
 
     # Populate specific view content
