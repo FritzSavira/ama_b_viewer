@@ -2,7 +2,7 @@
 
 **Autor:** Gemini  
 **Datum:** 2025-07-27  
-**Status:** Completed  
+**Status:** Proposed  
 **Ticket:** VIEW-01
 
 ---
