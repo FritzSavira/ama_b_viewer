@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Document Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        .navigation { margin-top: 20px; }
+        .navigation a { margin-right: 10px; text-decoration: none; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; color: #333; }
+        .navigation a:hover { background-color: #eee; }
+        .tab-nav { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+        .tab-nav a {
+            display: inline-block;
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #333;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab-nav a.active {
+            background-color: #f4f4f4;
+            border-color: #ccc;
+            border-bottom: 1px solid #f4f4f4;
+            font-weight: bold;
+        }
+        .tab-nav a:hover:not(.active) {
+            background-color: #eee;
+        }
+
+        .question-abstraction-section {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .question-abstraction-section h3 {
+            color: #007bff;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .question-abstraction-section dl {
+            display: grid;
+            grid-template-columns: auto 1fr; /* Für saubere Ausrichtung von Schlüssel und Wert */
+            gap: 5px 10px;
+            margin-bottom: 15px;
+        }
+
+        .question-abstraction-section dt {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .question-abstraction-section dd {
+            margin-left: 0; /* Standard-Einzug entfernen */
+        }
+
+        .question-abstraction-section ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .question-abstraction-section ul li {
+            background-color: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 3px;
+            display: inline-block; /* Tags nebeneinander anzeigen */
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Document ID: {{ doc._id }}</h1>
+
+    <div class="navigation">
+        <a href="{{ url_for('previous_document', id=doc._id, show=show) }}">Previous</a>
+        <a href="{{ url_for('next_document', id=doc._id, show=show) }}">Next</a>
+    </div>
+
+    <nav class="tab-nav">
+        <a href="{{ url_for('view_document', id=doc._id, show='all') }}" class="{{ 'active' if show == 'all' else '' }}">All</a>
+        <a href="{{ url_for('view_document', id=doc._id, show='question') }}" class="{{ 'active' if show == 'question' else '' }}">Question</a>
+        <a href="{{ url_for('view_document', id=doc._id, show='answer') }}" class="{{ 'active' if show == 'answer' else '' }}">Answer</a>
+        <a href="{{ url_for('view_document', id=doc._id, show='tags') }}" class="{{ 'active' if show == 'tags' else '' }}">Tags</a>
+        <a href="{{ url_for('view_document', id=doc._id, show='question_abstraction') }}" class="{{ 'active' if show == 'question_abstraction' else '' }}">Question Abstraction</a>
+    </nav>
+
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

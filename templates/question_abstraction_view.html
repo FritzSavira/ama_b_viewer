@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Question Abstraction</h2>
+    {% if doc.question_abstraction %}
+        <div class="question-abstraction-section">
+            <h3>Categorization</h3>
+            {% if doc.question_abstraction.categorization %}
+                <dl>
+                    <dt>Category:</dt>
+                    <dd>{{ doc.question_abstraction.categorization.category | default('N/A') }}</dd>
+
+                    <dt>Complexity:</dt>
+                    <dd>{{ doc.question_abstraction.categorization.complexity | default('N/A') }}</dd>
+
+                    <dt>Subcategory:</dt>
+                    <dd>{{ doc.question_abstraction.categorization.subcategory | default('N/A') }}</dd>
+
+                    <dt>Type:</dt>
+                    <dd>{{ doc.question_abstraction.categorization.type | default('N/A') }}</dd>
+                </dl>
+            {% else %}
+                <p>Categorization data not available.</p>
+            {% endif %}
+
+            <h3>Intent</h3>
+            {% if doc.question_abstraction.intent %}
+                <dl>
+                    <dt>Context:</dt>
+                    <dd>{{ doc.question_abstraction.intent.context | default('N/A') }}</dd>
+
+                    <dt>Expected Output:</dt>
+                    <dd>{{ doc.question_abstraction.intent.expected_output | default('N/A') }}</dd>
+
+                    <dt>Main Goal:</dt>
+                    <dd>{{ doc.question_abstraction.intent.main_goal | default('N/A') }}</dd>
+                </dl>
+            {% else %}
+                <p>Intent data not available.</p>
+            {% endif %}
+
+            <h3>Semantic</h3>
+            {% if doc.question_abstraction.semantic %}
+                <dl>
+                    <dt>Domain:</dt>
+                    <dd>{{ doc.question_abstraction.semantic.domain | default('N/A') }}</dd>
+
+                    <dt>Generic Query:</dt>
+                    <dd>{{ doc.question_abstraction.semantic.generic_query | default('N/A') }}</dd>
+
+                    <dt>Information Goal:</dt>
+                    <dd>{{ doc.question_abstraction.semantic.information_goal | default('N/A') }}</dd>
+                </dl>
+            {% else %}
+                <p>Semantic data not available.</p>
+            {% endif %}
+
+            <h3>Tagging</h3>
+            {% if doc.question_abstraction.tagging %}
+                <dl>
+                    <dt>Abstraction Level:</dt>
+                    <dd>{{ doc.question_abstraction.tagging.abstraction_level | default('N/A') }}</dd>
+
+                    <dt>Relation:</dt>
+                    <dd>{{ doc.question_abstraction.tagging.relation | default('N/A') }}</dd>
+
+                    <dt>Tags:</dt>
+                    <dd>
+                        {% if doc.question_abstraction.tagging.tags and doc.question_abstraction.tagging.tags is iterable and not doc.question_abstraction.tagging.tags is string %}
+                            <ul>
+                                {% for tag in doc.question_abstraction.tagging.tags %}
+                                    <li>{{ tag }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </dd>
+                </dl>
+            {% else %}
+                <p>Tagging data not available.</p>
+            {% endif %}
+        </div>
+    {% else %}
+        <p>No 'question_abstraction' field found for this document.</p>
+    {% endif %}
+{% endblock %}

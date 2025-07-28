@@ -8,6 +8,21 @@ from dotenv import load_dotenv
 # Load environment variables from .env file, if available
 load_dotenv()
 
+app = Flask(__name__)
+
+# Custom Jinja2 filter to convert Python dict to JSON string
+import json
+from bson import ObjectId
+
+@app.template_filter('tojson')
+def tojson_filter(value, indent=None):
+    class CustomEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, ObjectId):
+                return str(obj)
+            return json.JSONEncoder.default(self, obj)
+    return json.dumps(value, indent=indent, cls=CustomEncoder)
+
 
 # Initialize MongoDB connection
 def get_mongo_client():
@@ -42,5 +57,52 @@ def get_collection_schema(collection):
                     find_fields(item, prefix)
         find_fields(doc)
     return fields
+
+@app.route('/')
+def index():
+    return redirect(url_for('view_document', id=collection.find_one()['_id']))
+
+@app.route('/view/<id>')
+def view_document(id):
+    doc = collection.find_one({'_id': ObjectId(id)})
+    if not doc:
+        return "Document not found", 404
+
+    show_view = request.args.get('show', 'all')
+
+    if show_view == 'question_abstraction':
+        return render_template('question_abstraction_view.html', doc=doc, show=show_view)
+    else:
+        return render_template('index.html', doc=doc, show=show_view)
+
+@app.route('/next/<id>')
+def next_document(id):
+    current_doc = collection.find_one({'_id': ObjectId(id)})
+    if not current_doc:
+        return "Document not found", 404
+
+    next_doc = collection.find_one({'_id': {'$gt': ObjectId(id)}}, sort=[('_id', 1)])
+    if next_doc:
+        show_view = request.args.get('show', 'all')
+        return redirect(url_for('view_document', id=next_doc['_id'], show=show_view))
+    else:
+        return "No next document", 404
+
+@app.route('/previous/<id>')
+def previous_document(id):
+    current_doc = collection.find_one({'_id': ObjectId(id)})
+    if not current_doc:
+        return "Document not found", 404
+
+    previous_doc = collection.find_one({'_id': {'$lt': ObjectId(id)}}, sort=[('_id', -1)])
+    if previous_doc:
+        show_view = request.args.get('show', 'all')
+        return redirect(url_for('view_document', id=previous_doc['_id'], show=show_view))
+    else:
+        return "No previous document", 404
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
 
 

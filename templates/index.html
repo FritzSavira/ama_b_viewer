@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if show == 'all' %}
+        <h2>Full Document</h2>
+        <pre>{{ doc | tojson(indent=2) }}</pre>
+    {% elif show == 'question' %}
+        <h2>Question</h2>
+        {% if doc.question %}
+            <pre>{{ doc.question | tojson(indent=2) }}</pre>
+        {% else %}
+            <p>No 'question' field found for this document.</p>
+        {% endif %}
+    {% elif show == 'answer' %}
+        <h2>Answer</h2>
+        {% if doc.answer %}
+            <pre>{{ doc.answer | tojson(indent=2) }}</pre>
+        {% else %}
+            <p>No 'answer' field found for this document.</p>
+        {% endif %}
+    {% elif show == 'tags' %}
+        <h2>Tags</h2>
+        {% set tags_found = [] %}
+        {% for key, value in doc.items() %}
+            {% if value is iterable and not value is string %}
+                {% for item in value %}
+                    {% if item is string %}
+                        {% set _ = tags_found.append(item) %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+
+        {% if tags_found %}
+            <ul>
+                {% for tag in tags_found %}
+                    <li>{{ tag }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No list-like fields with string items found for this document.</p>
+        {% endif %}
+    {% endif %}
+{% endblock %}
