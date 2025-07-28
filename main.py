@@ -72,6 +72,37 @@ def get_answer_content(doc):
     except (KeyError, IndexError, TypeError):
         return "<p>Answer content not found at the expected path (reply.completion.choices[0].message.content).</p>"
 
+def get_categorized_tags(doc):
+    """Extracts and categorizes tags from the document, excluding empty categories."""
+    categorized_tags = {}
+
+    # Only include categories that are expected to have tags based on analysis
+    tag_paths = {
+        "Bibelreferenzen": "tags.bibelreferenzen",
+        "Hauptthemen": "tags.hauptthemen",
+        "Theologische Konzepte": "tags.theologische_konzepte"
+    }
+
+    for category_name, path in tag_paths.items():
+        parts = path.split('.')
+        current_level = doc
+        found_tags = []
+        try:
+            for part in parts:
+                if isinstance(current_level, dict) and part in current_level:
+                    current_level = current_level[part]
+                else:
+                    raise KeyError # Path not found
+            if isinstance(current_level, list):
+                found_tags = [tag for tag in current_level if isinstance(tag, str)] # Ensure tags are strings
+        except (KeyError, TypeError):
+            found_tags = [] # No tags or invalid path
+
+        if found_tags: # Only add category if tags are found
+            categorized_tags[category_name] = found_tags
+
+    return categorized_tags
+
 @app.route('/view/<id>')
 def view_document(id):
     doc = collection.find_one({'_id': ObjectId(id)})
@@ -105,12 +136,15 @@ def view_document(id):
         'first_doc_id': first_doc_id,
         'last_doc_id': last_doc_id,
         'answer_content': None,  # Default to None
-        'page_title': page_title
+        'page_title': page_title,
+        'categorized_tags': None # Default to None
     }
 
     # Populate specific view content
     if show_view == 'answer':
         template_context['answer_content'] = get_answer_content(doc)
+    elif show_view == 'tags':
+        template_context['categorized_tags'] = get_categorized_tags(doc)
 
     if show_view == 'question_abstraction':
         return render_template('question_abstraction_view.html', **template_context)

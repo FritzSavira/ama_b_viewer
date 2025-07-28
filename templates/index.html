@@ -22,25 +22,21 @@
         </div>
     {% elif show == 'tags' %}
         <h2>Tags</h2>
-        {% set tags_found = [] %}
-        {% for key, value in doc.items() %}
-            {% if value is iterable and not value is string %}
-                {% for item in value %}
-                    {% if item is string %}
-                        {% set _ = tags_found.append(item) %}
-                    {% endif %}
+        <div class="tag-categories-container">
+            {% if categorized_tags %}
+                {% for category_name, tags in categorized_tags.items() %}
+                    <div class="tag-category-section">
+                        <h3>{{ category_name }}</h3>
+                        <div class="tag-list">
+                            {% for tag in tags %}
+                                <span class="tag-pill">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
                 {% endfor %}
+            {% else %}
+                <p>No categorized tags found for this document.</p>
             {% endif %}
-        {% endfor %}
-
-        {% if tags_found %}
-            <ul>
-                {% for tag in tags_found %}
-                    <li>{{ tag }}</li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No list-like fields with string items found for this document.</p>
-        {% endif %}
+        </div>
     {% endif %}
 {% endblock %}

@@ -71,6 +71,50 @@
             background-color: transparent;
         }
 
+        .rendered-markdown pre code {
+            padding: 0;
+            background-color: transparent;
+        }
+
+        /* Styles for Tag View */
+        .tag-categories-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px; /* Space between category sections */
+        }
+
+        .tag-category-section {
+            flex: 1 1 calc(50% - 20px); /* Two columns, with gap */
+            min-width: 300px; /* Minimum width for a column */
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #fdfdfd;
+        }
+
+        .tag-category-section h3 {
+            color: #007bff;
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px; /* Space between tags */
+        }
+
+        .tag-pill {
+            background-color: #e9ecef;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            white-space: nowrap; /* Prevent tags from breaking */
+        }
+
         .question-abstraction-section {
             border: 1px solid #ddd;
             padding: 15px;
@@ -118,7 +162,7 @@
     </style>
 </head>
 <body>
-    <h1>{{ page_title }}</h1>
+    <h2>{{ page_title }}</h2>
 
     <div class="navigation">
         <a href="{{ url_for('view_document', id=first_doc_id, show=show) if first_doc_id else '#' }}">First</a>

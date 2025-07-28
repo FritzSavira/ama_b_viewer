@@ -1,5 +1,30 @@
 # Development Log
 
+## 2025-07-28 - Feature: Enhanced Tags View
+
+### Overview
+Redesigned the `[Tags]` view to display categorized tags in a visually appealing and structured format, improving readability and user experience. Categories with no tags are now automatically hidden.
+
+### Key Changes & Rationale
+
+1.  **Backend (`main.py`):**
+    *   Introduced `get_categorized_tags(doc)` function to extract and organize tags into predefined categories.
+    *   This function now dynamically filters out categories that contain no tags for a given document, ensuring a cleaner display.
+    *   The `categorized_tags` data is passed to the template context.
+
+2.  **Frontend (`templates/index.html`):**
+    *   The `[Tags]` view block was refactored to iterate over the `categorized_tags` and render each category with its respective tags.
+    *   Tags are displayed as visually distinct "pills" within each category section.
+
+3.  **Styling (`templates/base.html`):**
+    *   Added new CSS classes (`.tag-categories-container`, `.tag-category-section`, `.tag-list`, `.tag-pill`) to `base.html`.
+    *   These styles provide a clean, two-column layout for categories (where space allows) and a clear, subtle design for individual tag pills, aligning with the established UI/UX.
+
+### Files Modified
+*   `main.py`
+*   `templates/index.html`
+*   `templates/base.html`
+
 ## 2025-07-28 - Feature: Dynamic Page Title
 
 ### Overview
