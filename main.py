@@ -62,6 +62,13 @@ def get_collection_schema(collection):
 def index():
     return redirect(url_for('view_document', id=collection.find_one()['_id']))
 
+def get_answer_content(doc):
+    """Safely retrieves the answer content from the nested document structure."""
+    try:
+        return doc['reply']['completion']['choices'][0]['message']['content']
+    except (KeyError, IndexError, TypeError):
+        return "Answer content not found at the expected path (reply.completion.choices[0].message.content)."
+
 @app.route('/view/<id>')
 def view_document(id):
     doc = collection.find_one({'_id': ObjectId(id)})
@@ -70,10 +77,29 @@ def view_document(id):
 
     show_view = request.args.get('show', 'all')
 
+    # Get the first and last document IDs for navigation
+    first_doc = collection.find_one(sort=[('_id', 1)])
+    last_doc = collection.find_one(sort=[('_id', -1)])
+    first_doc_id = first_doc['_id'] if first_doc else None
+    last_doc_id = last_doc['_id'] if last_doc else None
+
+    # Prepare template context
+    template_context = {
+        'doc': doc,
+        'show': show_view,
+        'first_doc_id': first_doc_id,
+        'last_doc_id': last_doc_id,
+        'answer_content': None  # Default to None
+    }
+
+    # Populate specific view content
+    if show_view == 'answer':
+        template_context['answer_content'] = get_answer_content(doc)
+
     if show_view == 'question_abstraction':
-        return render_template('question_abstraction_view.html', doc=doc, show=show_view)
+        return render_template('question_abstraction_view.html', **template_context)
     else:
-        return render_template('index.html', doc=doc, show=show_view)
+        return render_template('index.html', **template_context)
 
 @app.route('/next/<id>')
 def next_document(id):

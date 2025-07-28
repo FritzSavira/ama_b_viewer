@@ -1,5 +1,45 @@
 # Development Log
 
+## 2025-07-28 - Refactor: Improved Answer View Logic
+
+### Overview
+Refactored the logic for the "Answer" view to robustly display content from a deeply nested field (`reply.completion.choices[0].message.content`). This change improves code quality and prevents potential runtime errors if the data structure varies.
+
+### Key Changes & Rationale
+
+1.  **`main.py` Modifications (Good Practice):**
+    *   **Helper Function:** Introduced a new helper function, `get_answer_content(doc)`, to encapsulate the logic for safely accessing the nested answer field.
+    *   **Robust Error Handling:** The function uses a `try...except` block to gracefully handle `KeyError`, `IndexError`, or `TypeError` if the expected path does not exist in the document, returning a user-friendly message instead of crashing.
+    *   **Separation of Concerns:** The main route `view_document` is now cleaner, as it delegates the complex data extraction to the helper function, improving readability and maintainability.
+
+2.  **`templates/index.html` Simplification:**
+    *   The template logic for the "Answer" view was simplified to directly render the `answer_content` variable passed from the backend.
+    *   This removes complex data access logic from the template, adhering to the principle of keeping templates focused on presentation.
+
+### Files Modified
+*   `main.py`
+*   `templates/index.html`
+
+## 2025-07-28 - Feature: "First" and "Last" Navigation Buttons
+
+### Overview
+Added "First" and "Last" buttons to the document navigation, allowing users to jump directly to the first and last documents in the MongoDB collection. This improves navigation efficiency, especially in large datasets.
+
+### Key Changes & Rationale
+
+1.  **`main.py` Modifications:**
+    *   The `view_document` function was updated to retrieve the `_id` of the first and last documents from the collection.
+    *   These IDs (`first_doc_id`, `last_doc_id`) are now passed to the template context, making them available for the navigation links.
+
+2.  **`templates/base.html` Modifications:**
+    *   Added "First" and "Last" buttons to the navigation bar.
+    *   The buttons are logically arranged as `[First] [Previous] [Next] [Last]` for an intuitive user experience.
+    *   The links correctly use the `first_doc_id` and `last_doc_id` passed from the backend.
+
+### Files Modified
+*   `main.py`
+*   `templates/base.html`
+
 ## 2025-07-28 - Feature: Filtered Data Views (VIEW-01)
 
 ### Overview

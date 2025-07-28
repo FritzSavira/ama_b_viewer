@@ -80,8 +80,10 @@
     <h1>Document ID: {{ doc._id }}</h1>
 
     <div class="navigation">
+        <a href="{{ url_for('view_document', id=first_doc_id, show=show) if first_doc_id else '#' }}">First</a>
         <a href="{{ url_for('previous_document', id=doc._id, show=show) }}">Previous</a>
         <a href="{{ url_for('next_document', id=doc._id, show=show) }}">Next</a>
+        <a href="{{ url_for('view_document', id=last_doc_id, show=show) if last_doc_id else '#' }}">Last</a>
     </div>
 
     <nav class="tab-nav">

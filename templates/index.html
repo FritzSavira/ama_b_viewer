@@ -13,10 +13,10 @@
         {% endif %}
     {% elif show == 'answer' %}
         <h2>Answer</h2>
-        {% if doc.answer %}
-            <pre>{{ doc.answer | tojson(indent=2) }}</pre>
+        {% if answer_content %}
+            <pre>{{ answer_content }}</pre>
         {% else %}
-            <p>No 'answer' field found for this document.</p>
+            <p>No answer content available.</p>
         {% endif %}
     {% elif show == 'tags' %}
         <h2>Tags</h2>
