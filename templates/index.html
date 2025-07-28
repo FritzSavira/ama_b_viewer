@@ -165,21 +165,32 @@
                         <p>No answer data available for this document.</p>
                     {% endif %}
                 {% elif show == 'tags' %}
-                    {# Logic to extract and display tags #}
-                    {% set all_tags = [] %}
-                    {% for key, value in doc.items() %}
-                        {% if value is iterable and value is not string %}
-                            {% for item in value %}
-                                {% if item is string %}
-                                    {% set _ = all_tags.append(item) %}
+                    {# Macro to recursively extract tags from lists #}
+                    {% macro extract_tags(data) %}
+                        {% set current_tags = [] %}
+                        {% if data is mapping %}
+                            {% for key, value in data.items() %}
+                                {% if value is iterable and value is not string %}
+                                    {% for item in value %}
+                                        {% if item is string %}
+                                            {% set _ = current_tags.append(item) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% elif value is mapping %}
+                                    {% set _ = current_tags.extend(extract_tags(value)) %}
                                 {% endif %}
                             {% endfor %}
                         {% endif %}
-                    {% endfor %}
-                    {% if all_tags %}
+                        {{ return(current_tags) }}
+                    {% endmacro %}
+
+                    {% set all_extracted_tags = extract_tags(doc) %}
+                    {% set unique_tags = all_extracted_tags | unique | sort %}
+
+                    {% if unique_tags %}
                         <div class="field-value">
                             <ul>
-                            {% for tag in all_tags %}
+                            {% for tag in unique_tags %}
                                 <li>{{ tag }}</li>
                             {% endfor %}
                             </ul>
