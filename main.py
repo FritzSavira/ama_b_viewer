@@ -111,6 +111,10 @@ def view_document(id):
 
     show_view = request.args.get('show', 'all')
 
+    # Handle deprecated 'question' view by redirecting to 'all'
+    if show_view == 'question':
+        show_view = 'all'
+
     # Get the first and last document IDs for navigation
     first_doc = collection.find_one(sort=[('_id', 1)])
     last_doc = collection.find_one(sort=[('_id', -1)])

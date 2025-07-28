@@ -1,5 +1,23 @@
 # Development Log
 
+## 2025-07-28 - Refactor: Menu Order and Question View Removal
+
+### Overview
+Reordered the main navigation tabs for improved user flow and removed the redundant "Question" view, streamlining the interface.
+
+### Key Changes & Rationale
+
+1.  **Frontend (`templates/base.html`):**
+    *   The order of navigation tabs was changed to: "Question Abstraction", "Answer", "Tags", "All".
+    *   The "Question" tab was removed from the navigation.
+
+2.  **Backend (`main.py`):**
+    *   Added logic to the `view_document` function to handle requests for the deprecated "Question" view. If `show='question'` is received, it now gracefully redirects to the "All" view to prevent errors and ensure a smooth user experience.
+
+### Files Modified
+*   `main.py`
+*   `templates/base.html`
+
 ## 2025-07-28 - Feature: Enhanced Tags View
 
 ### Overview

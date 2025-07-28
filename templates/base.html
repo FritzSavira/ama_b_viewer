@@ -172,11 +172,10 @@
     </div>
 
     <nav class="tab-nav">
-        <a href="{{ url_for('view_document', id=doc._id, show='all') }}" class="{{ 'active' if show == 'all' else '' }}">All</a>
-        <a href="{{ url_for('view_document', id=doc._id, show='question') }}" class="{{ 'active' if show == 'question' else '' }}">Question</a>
+        <a href="{{ url_for('view_document', id=doc._id, show='question_abstraction') }}" class="{{ 'active' if show == 'question_abstraction' else '' }}">Question Abstraction</a>
         <a href="{{ url_for('view_document', id=doc._id, show='answer') }}" class="{{ 'active' if show == 'answer' else '' }}">Answer</a>
         <a href="{{ url_for('view_document', id=doc._id, show='tags') }}" class="{{ 'active' if show == 'tags' else '' }}">Tags</a>
-        <a href="{{ url_for('view_document', id=doc._id, show='question_abstraction') }}" class="{{ 'active' if show == 'question_abstraction' else '' }}">Question Abstraction</a>
+        <a href="{{ url_for('view_document', id=doc._id, show='all') }}" class="{{ 'active' if show == 'all' else '' }}">All</a>
     </nav>
 
     {% block content %}
