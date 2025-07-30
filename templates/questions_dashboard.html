@@ -1,127 +1,197 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fragen-Kategorisierung und -Intention</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            padding-top: 20px;
-        }
-        .chart-container {
-            position: relative;
-            margin: auto;
-            height: 300px; /* Angepasst */
-            width: 100%;  /* Angepasst */
-        }
-    </style>
+    <title>Question Categorization & Intent</title>
+    {% extends "base.html" %}
 </head>
 <body>
+    {% block content %}
     <div class="container">
-        <h1 class="mb-4">Fragen-Kategorisierung und -Intention</h1>
+        <h1 class="mb-4">Question Categorization & Intent</h1>
 
         <div class="row">
-            <div class="col-md-6">
-                <h2>Kategorien</h2>
-                <div class="chart-container">
-                    <canvas id="categoryChart"></canvas>
+            <div class="col-md-6 mb-4">
+                <h2>Categories</h2>
+                <div id="category-chart-wrapper" class="chart-wrapper">
+                    <div class="loading-indicator">
+                        <div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div>
+                    </div>
+                    <div class="error-message" style="display: none;">
+                        <p class="text-danger">Could not load chart data.</p>
+                        <button class="btn btn-sm btn-secondary retry-button">Retry</button>
+                    </div>
+                    <div class="chart-container" style="display: none;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <h2>Unterkategorien</h2>
-                <div class="chart-container">
-                    <canvas id="subcategoryChart"></canvas>
+            <div class="col-md-6 mb-4">
+                <h2>Subcategories</h2>
+                <div id="subcategory-chart-wrapper" class="chart-wrapper">
+                    <div class="loading-indicator">
+                        <div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div>
+                    </div>
+                    <div class="error-message" style="display: none;">
+                        <p class="text-danger">Could not load chart data.</p>
+                        <button class="btn btn-sm btn-secondary retry-button">Retry</button>
+                    </div>
+                    <div class="chart-container" style="display: none;">
+                        <canvas id="subcategoryChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="row mt-4">
-            <div class="col-md-6">
-                <h2>Typen</h2>
-                <div class="chart-container">
-                    <canvas id="typeChart"></canvas>
+            <div class="col-md-6 mb-4">
+                <h2>Types</h2>
+                <div id="type-chart-wrapper" class="chart-wrapper">
+                    <div class="loading-indicator">
+                        <div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div>
+                    </div>
+                    <div class="error-message" style="display: none;">
+                        <p class="text-danger">Could not load chart data.</p>
+                        <button class="btn btn-sm btn-secondary retry-button">Retry</button>
+                    </div>
+                    <div class="chart-container" style="display: none;">
+                        <canvas id="typeChart"></canvas>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <h2>Komplexität</h2>
-                <div class="chart-container">
-                    <canvas id="complexityChart"></canvas>
+            <div class="col-md-6 mb-4">
+                <h2>Complexity</h2>
+                <div id="complexity-chart-wrapper" class="chart-wrapper">
+                    <div class="loading-indicator">
+                        <div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div>
+                    </div>
+                    <div class="error-message" style="display: none;">
+                        <p class="text-danger">Could not load chart data.</p>
+                        <button class="btn btn-sm btn-secondary retry-button">Retry</button>
+                    </div>
+                    <div class="chart-container" style="display: none;">
+                        <canvas id="complexityChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-
-        
 
         <div class="row mt-4">
-            <div class="col-md-12">
-                <h2>Domänen</h2>
-                <div class="chart-container">
-                    <canvas id="domainChart"></canvas>
+            <div class="col-md-12 mb-4">
+                <h2>Domains</h2>
+                <div id="domain-chart-wrapper" class="chart-wrapper">
+                    <div class="loading-indicator">
+                        <div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div>
+                    </div>
+                    <div class="error-message" style="display: none;">
+                        <p class="text-danger">Could not load chart data.</p>
+                        <button class="btn btn-sm btn-secondary retry-button">Retry</button>
+                    </div>
+                    <div class="chart-container" style="display: none;">
+                        <canvas id="domainChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <a href="/" class="btn btn-primary mt-4">Zurück zur Startseite</a>
+        <a href="/" class="btn btn-primary mt-4">Back to Home</a>
     </div>
+    {% endblock %}
 
+    {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/questions_categorization')
-                .then(response => response.json())
-                .then(data => {
-                    // Function to create a bar chart
-                    function createBarChart(ctxId, title, chartData) {
-                        // Limit to top 10 categories
-                        const top10Data = chartData.slice(0, 10);
-                        const labels = top10Data.map(item => item._id);
-                        const counts = top10Data.map(item => item.count);
+            const chartConfigs = [
+                { key: 'category', wrapperId: 'category-chart-wrapper', canvasId: 'categoryChart', title: 'Questions by Category' },
+                { key: 'subcategory', wrapperId: 'subcategory-chart-wrapper', canvasId: 'subcategoryChart', title: 'Questions by Subcategory' },
+                { key: 'type', wrapperId: 'type-chart-wrapper', canvasId: 'typeChart', title: 'Questions by Type' },
+                { key: 'complexity', wrapperId: 'complexity-chart-wrapper', canvasId: 'complexityChart', title: 'Questions by Complexity' },
+                { key: 'domain', wrapperId: 'domain-chart-wrapper', canvasId: 'domainChart', title: 'Questions by Domain' }
+            ];
 
-                        const ctx = document.getElementById(ctxId).getContext('2d');
-                        new Chart(ctx, {
-                            type: 'bar',
-                            data: {
-                                labels: labels,
-                                datasets: [{
-                                    label: 'Anzahl (Top 10 Kategorien)', // Angepasst
-                                    data: counts,
-                                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                                    borderColor: 'rgba(54, 162, 235, 1)',
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    title: {
-                                        display: true,
-                                        text: title
-                                    },
-                                    legend: {
-                                        display: true // Angepasst
-                                    }
-                                },
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
+            function createBarChart(ctxId, title, chartData) {
+                const top10Data = chartData.slice(0, 10);
+                const labels = top10Data.map(item => item._id);
+                const counts = top10Data.map(item => item.count);
+
+                const ctx = document.getElementById(ctxId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Count (Top 10)',
+                            data: counts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: { display: true, text: title },
+                            legend: { display: true }
+                        },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+
+            function setWrapperState(wrapper, state) {
+                const loading = wrapper.querySelector('.loading-indicator');
+                const error = wrapper.querySelector('.error-message');
+                const container = wrapper.querySelector('.chart-container');
+
+                loading.style.display = state === 'loading' ? 'block' : 'none';
+                error.style.display = state === 'error' ? 'block' : 'none';
+                container.style.display = state === 'success' ? 'block' : 'none';
+            }
+
+            function loadAllCharts() {
+                chartConfigs.forEach(config => {
+                    const wrapper = document.getElementById(config.wrapperId);
+                    setWrapperState(wrapper, 'loading');
+                });
+
+                fetch('/api/questions_categorization')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        chartConfigs.forEach(config => {
+                            const wrapper = document.getElementById(config.wrapperId);
+                            if (data[config.key] && data[config.key].length > 0) {
+                                setWrapperState(wrapper, 'success');
+                                createBarChart(config.canvasId, config.title, data[config.key]);
+                            } else {
+                                setWrapperState(wrapper, 'error');
+                                wrapper.querySelector('.text-danger').textContent = 'No data available for this category.';
                             }
                         });
-                    }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching chart data:', error);
+                        chartConfigs.forEach(config => {
+                            const wrapper = document.getElementById(config.wrapperId);
+                            setWrapperState(wrapper, 'error');
+                        });
+                    });
+            }
 
-                    // Create charts for each category
-                    createBarChart('categoryChart', 'Fragen nach Kategorie', data.category);
-                    createBarChart('subcategoryChart', 'Fragen nach Unterkategorie', data.subcategory);
-                    createBarChart('typeChart', 'Fragen nach Typ', data.type);
-                    createBarChart('complexityChart', 'Fragen nach Komplexität', data.complexity);
-                    createBarChart('domainChart', 'Fragen nach Domäne', data.domain);
+            document.querySelectorAll('.retry-button').forEach(button => {
+                button.addEventListener('click', loadAllCharts);
+            });
 
-                })
-                .catch(error => console.error('Error fetching data:', error));
+            loadAllCharts();
         });
     </script>
+    {% endblock %}
 </body>
 </html>

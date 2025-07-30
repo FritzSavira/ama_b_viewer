@@ -1,86 +1,86 @@
 ---
 project: "ama_b_viewer"
-title: "Entwicklungs-Aufgabenliste: Auswertung und Visualisierung"
+title: "Development Task List: Analysis and Visualization"
 version: 1.0.0
 last_updated: "2025-07-30"
 ---
 
-# Entwicklungs-Aufgabenliste
+# Development Task List
 
-Dieses Dokument verfolgt die Entwicklungsaufgaben für das Projekt `ama_b_viewer`.
+This document tracks the development tasks for the `ama_b_viewer` project.
 
-## Phase 1: Backend - Datenaufbereitung (Abgeschlossen)
+## Phase 1: Backend - Data Preparation (Completed)
 
-- [x] **TASK-1.1:** MongoDB Aggregation für "Fragen-Kategorisierung und -Intention"
-  - **description:** Aggregations-Pipelines zur Ermittlung der Verteilung von Fragen-Metadaten.
+- [x] **TASK-1.1:** MongoDB Aggregation for "Question Categorization and Intent"
+  - **description:** Aggregation pipelines to determine the distribution of question metadata.
   - **status:** completed
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-- [x] **TASK-1.2:** Flask API Endpoint für "Fragen-Kategorisierung und -Intention"
-  - **description:** API-Endpunkt (`/api/questions_categorization`) zur Bereitstellung der Daten aus TASK-1.1.
+- [x] **TASK-1.2:** Flask API Endpoint for "Question Categorization and Intent"
+  - **description:** API endpoint (`/api/questions_categorization`) to provide the data from TASK-1.1.
   - **status:** completed
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-- [x] **TASK-1.3:** MongoDB Aggregation für "Tag-Analyse"
-  - **description:** Aggregations-Pipelines zur Ermittlung der Häufigkeit von Tags.
+- [x] **TASK-1.3:** MongoDB Aggregation for "Tag Analysis"
+  - **description:** Aggregation pipelines to determine the frequency of tags.
   - **status:** completed
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-- [x] **TASK-1.4:** Flask API Endpoint für "Tag-Analyse"
-  - **description:** API-Endpunkt (`/api/tag_frequency`) zur Bereitstellung der Daten aus TASK-1.3.
+- [x] **TASK-1.4:** Flask API Endpoint for "Tag Analysis"
+  - **description:** API endpoint (`/api/tag_frequency`) to provide the data from TASK-1.3.
   - **status:** completed
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-- [x] **TASK-1.5:** MongoDB Aggregation für "Beziehungs-Netzwerk" (Co-Occurrence)
-  - **description:** Aggregation zur Ermittlung der Co-Occurrence von Bibelreferenzen und Hauptthemen für das Caching.
+- [x] **TASK-1.5:** MongoDB Aggregation for "Relationship Network" (Co-occurrence)
+  - **description:** Aggregation to determine the co-occurrence of biblical references and main themes for caching.
   - **status:** completed
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-- [x] **TASK-1.6:** Implementierung des Caching-Mechanismus für Netzwerkdaten
-  - **description:** Funktion zum Speichern der Netzwerkdaten in einer Cache-Collection (`ama_log_network_cache`).
+- [x] **TASK-1.6:** Implement Caching Mechanism for Network Data
+  - **description:** Function to save the network data into a cache collection (`ama_log_network_cache`).
   - **status:** completed
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-- [x] **TASK-1.7:** Flask API Endpoint für "Beziehungs-Netzwerk"
-  - **description:** API-Endpunkt (`/api/bible_theme_network`) zur Bereitstellung der gecachten Netzwerkdaten.
+- [x] **TASK-1.7:** Flask API Endpoint for "Relationship Network"
+  - **description:** API endpoint (`/api/bible_theme_network`) to provide the cached network data.
   - **status:** completed
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-## Phase 2: Frontend - Visualisierung (Abgeschlossen)
+## Phase 2: Frontend - Visualization (Completed)
 
-- [x] **TASK-2.1:** Frontend-Seite und Visualisierung für "Fragen-Kategorisierung"
-  - **description:** Erstellung von `questions_dashboard.html` und Implementierung von Chart.js-Diagrammen.
+- [x] **TASK-2.1:** Frontend Page and Visualization for "Question Categorization"
+  - **description:** Creation of `questions_dashboard.html` and implementation of Chart.js diagrams.
   - **status:** completed
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-- [x] **TASK-2.2:** Frontend-Seite und Visualisierung für "Tag-Analyse"
-  - **description:** Erstellung von `tags_dashboard.html` und Implementierung von Tag-Clouds/Balkendiagrammen.
+- [x] **TASK-2.2:** Frontend Page and Visualization for "Tag Analysis"
+  - **description:** Creation of `tags_dashboard.html` and implementation of tag clouds/bar charts.
   - **status:** completed
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-- [x] **TASK-2.3:** Frontend-Seite und Visualisierung für "Beziehungs-Netzwerk"
-  - **description:** Erstellung von `bible_theme_network.html` und Implementierung des D3.js Force-Directed Graph.
+- [x] **TASK-2.3:** Frontend Page and Visualization for "Relationship Network"
+  - **description:** Creation of `bible_theme_network.html` and implementation of the D3.js Force-Directed Graph.
   - **status:** completed
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-## Phase 3: Integration & Verfeinerung
+## Phase 3: Integration & Refinement
 
-- [x] **TASK-3.1:** Integration der Visualisierungen in die UI
-  - **description:** Hinzufügen von Navigationslinks zu den neuen Dashboard-Seiten.
+- [x] **TASK-3.1:** Integrate Visualizations into the UI
+  - **description:** Add navigation links to the new dashboard pages.
   - **status:** completed
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-- [ ] **TASK-3.2:** Implementiere Fehlerbehandlung und Ladezustände
-  - **description:** Robuste Fehlerbehandlung für API-Aufrufe und Ladeindikatoren im Frontend hinzufügen.
+- [x] **TASK-3.2:** Implement Error Handling and Loading States
+  - **description:** Add robust error handling for API calls and loading indicators in the frontend.
+  - **status:** completed
+  - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
+
+- [ ] **TASK-3.3:** Performance Optimization
+  - **description:** Review and optimize aggregation pipelines and frontend rendering performance.
   - **status:** pending
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
 
-- [ ] **TASK-3.3:** Performance-Optimierung
-  - **description:** Überprüfung und Optimierung der Aggregations-Pipelines und der Rendering-Performance.
-  - **status:** pending
-  - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
-
-- [ ] **TASK-3.4:** Technische Dokumentation
-  - **description:** Erstellung der technischen Dokumentation für Backend-Endpunkte und Frontend-Komponenten.
+- [ ] **TASK-3.4:** Technical Documentation
+  - **description:** Create technical documentation for backend endpoints and frontend components.
   - **status:** pending
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`

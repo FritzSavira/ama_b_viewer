@@ -1,59 +1,65 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tag-Analyse (Häufigkeit)</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            padding-top: 20px;
-        }
-        .chart-container {
-            position: relative;
-            margin: auto;
-            height: 300px;
-            width: 100%;
-        }
-    </style>
+    <title>Tag Analysis (Frequency)</title>
+    {% extends "base.html" %}
 </head>
 <body>
+    {% block content %}
     <div class="container">
-        <h1 class="mb-4">Tag-Analyse (Häufigkeit)</h1>
+        <h1 class="mb-4">Tag Analysis (Frequency)</h1>
 
         <div class="row">
-            <div class="col-md-6">
-                <h2>Bibelreferenzen</h2>
-                <div class="chart-container">
-                    <canvas id="bibelreferenzenChart"></canvas>
+            <div class="col-md-6 mb-4">
+                <h2>Biblical References</h2>
+                <div id="bibelreferenzen-chart-wrapper" class="chart-wrapper">
+                    <div class="loading-indicator"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>
+                    <div class="error-message" style="display: none;">
+                        <p class="text-danger">Could not load chart data.</p>
+                        <button class="btn btn-sm btn-secondary retry-button">Retry</button>
+                    </div>
+                    <div class="chart-container" style="display: none;"><canvas id="bibelreferenzenChart"></canvas></div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <h2>Hauptthemen</h2>
-                <div class="chart-container">
-                    <canvas id="hauptthemenChart"></canvas>
+            <div class="col-md-6 mb-4">
+                <h2>Main Themes</h2>
+                <div id="hauptthemen-chart-wrapper" class="chart-wrapper">
+                    <div class="loading-indicator"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>
+                    <div class="error-message" style="display: none;">
+                        <p class="text-danger">Could not load chart data.</p>
+                        <button class="btn btn-sm btn-secondary retry-button">Retry</button>
+                    </div>
+                    <div class="chart-container" style="display: none;"><canvas id="hauptthemenChart"></canvas></div>
                 </div>
             </div>
         </div>
 
         <div class="row mt-4">
-            <div class="col-md-6">
-                <h2>Theologische Konzepte</h2>
-                <div class="chart-container">
-                    <canvas id="theologischeKonzepteChart"></canvas>
+            <div class="col-md-6 mb-4">
+                <h2>Theological Concepts</h2>
+                <div id="theologische-konzepte-chart-wrapper" class="chart-wrapper">
+                    <div class="loading-indicator"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>
+                    <div class="error-message" style="display: none;">
+                        <p class="text-danger">Could not load chart data.</p>
+                        <button class="btn btn-sm btn-secondary retry-button">Retry</button>
+                    </div>
+                    <div class="chart-container" style="display: none;"><canvas id="theologischeKonzepteChart"></canvas></div>
                 </div>
             </div>
         </div>
 
-        <a href="/" class="btn btn-primary mt-4">Zurück zur Startseite</a>
+        <a href="/" class="btn btn-primary mt-4">Back to Home</a>
     </div>
+    {% endblock %}
 
+    {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Function to create a bar chart
-            function createBarChart(ctxId, title, chartData, limit = 10) { // limit Parameter hinzugefügt
-                // Limit categories based on the provided limit
+
+            function createBarChart(ctxId, title, chartData, limit = 10) {
                 const limitedData = chartData.slice(0, limit);
                 const labels = limitedData.map(item => item._id);
                 const counts = limitedData.map(item => item.count);
@@ -64,7 +70,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: `Anzahl (Top ${limit} Tags)`, // Legende angepasst
+                            label: `Count (Top ${limit} Tags)`,
                             data: counts,
                             backgroundColor: 'rgba(75, 192, 192, 0.6)',
                             borderColor: 'rgba(75, 192, 192, 1)',
@@ -74,48 +80,58 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: title
-                            },
-                            legend: {
-                                display: true
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
+                        plugins: { title: { display: true, text: title }, legend: { display: true } },
+                        scales: { y: { beginAtZero: true } }
                     }
                 });
             }
 
-            // Fetch data for Bibelreferenzen
-            fetch('/api/tag_frequency/bibelreferenzen')
-                .then(response => response.json())
-                .then(data => {
-                    createBarChart('bibelreferenzenChart', 'Häufigkeit der Bibelreferenzen', data, 20); // Limit auf 20 gesetzt
-                })
-                .catch(error => console.error('Error fetching Bibelreferenzen data:', error));
+            function setWrapperState(wrapper, state) {
+                const loading = wrapper.querySelector('.loading-indicator');
+                const error = wrapper.querySelector('.error-message');
+                const container = wrapper.querySelector('.chart-container');
 
-            // Fetch data for Hauptthemen
-            fetch('/api/tag_frequency/hauptthemen')
-                .then(response => response.json())
-                .then(data => {
-                    createBarChart('hauptthemenChart', 'Häufigkeit der Hauptthemen', data); // Standardlimit 10
-                })
-                .catch(error => console.error('Error fetching Hauptthemen data:', error));
+                loading.style.display = state === 'loading' ? 'block' : 'none';
+                error.style.display = state === 'error' ? 'block' : 'none';
+                container.style.display = state === 'success' ? 'block' : 'none';
+            }
 
-            // Fetch data for Theologische Konzepte
-            fetch('/api/tag_frequency/theologische_konzepte')
-                .then(response => response.json())
-                .then(data => {
-                    createBarChart('theologischeKonzepteChart', 'Häufigkeit der Theologischen Konzepte', data); // Standardlimit 10
-                })
-                .catch(error => console.error('Error fetching Theologische Konzepte data:', error));
+            function loadChart(wrapperId, endpoint, chartId, title, limit) {
+                const wrapper = document.getElementById(wrapperId);
+                const retryButton = wrapper.querySelector('.retry-button');
+
+                const fetchData = () => {
+                    setWrapperState(wrapper, 'loading');
+
+                    fetch(endpoint)
+                        .then(response => {
+                            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data && data.length > 0) {
+                                setWrapperState(wrapper, 'success');
+                                createBarChart(chartId, title, data, limit);
+                            } else {
+                                setWrapperState(wrapper, 'error');
+                                wrapper.querySelector('.text-danger').textContent = 'No data available for this category.';
+                            }
+                        })
+                        .catch(error => {
+                            console.error(`Error fetching from ${endpoint}:`, error);
+                            setWrapperState(wrapper, 'error');
+                        });
+                };
+
+                retryButton.addEventListener('click', fetchData);
+                fetchData();
+            }
+
+            loadChart('bibelreferenzen-chart-wrapper', '/api/tag_frequency/bibelreferenzen', 'bibelreferenzenChart', 'Frequency of Biblical References', 20);
+            loadChart('hauptthemen-chart-wrapper', '/api/tag_frequency/hauptthemen', 'hauptthemenChart', 'Frequency of Main Themes', 10);
+            loadChart('theologische-konzepte-chart-wrapper', '/api/tag_frequency/theologische_konzepte', 'theologischeKonzepteChart', 'Frequency of Theological Concepts', 10);
         });
     </script>
+    {% endblock %}
 </body>
 </html>

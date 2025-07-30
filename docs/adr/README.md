@@ -1,18 +1,18 @@
 # Architectural Decision Records (ADRs)
 
-Dieses Verzeichnis enthält die **Architectural Decision Records (ADRs)** für das `ama_b_viewer` Projekt. Ein ADR ist ein kurzes Dokument, das eine wichtige architektonische Entscheidung beschreibt, die während der Entwicklung getroffen wurde.
+This directory contains the **Architectural Decision Records (ADRs)** for the `ama_b_viewer` project. An ADR is a short document that describes an important architectural decision made during development.
 
-## Zweck
+## Purpose
 
-ADRs dienen dazu, den Kontext und die Begründung hinter wichtigen Entscheidungen festzuhalten. Dies hilft neuen Entwicklern zu verstehen, *warum* das System so aufgebaut ist, wie es ist, und verhindert, dass vergangene Diskussionen wiederholt werden müssen.
+ADRs serve to capture the context and reasoning behind significant decisions. This helps new developers understand *why* the system is built the way it is and prevents having to re-litigate past discussions.
 
-## Wann sollte ein neues ADR erstellt werden?
+## When to Create a New ADR
 
-Ein neues ADR sollte erstellt werden, wenn eine Entscheidung signifikante Auswirkungen auf das Projekt hat, wie zum Beispiel:
+A new ADR should be created when a decision has a significant impact on the project, such as:
 
-*   Die Einführung einer neuen Technologie oder eines neuen Frameworks (z.B. eine neue JavaScript-Bibliothek).
-*   Eine Änderung der grundlegenden Anwendungsarchitektur (z.B. die Einführung von Caching).
-*   Die Festlegung eines wichtigen technischen Standards oder Musters (z.B. unsere Commit-Konvention).
-*   Die Implementierung eines größeren, in sich geschlossenen Features.
+*   Introducing a new technology or framework (e.g., a new JavaScript library).
+*   Changing the fundamental application architecture (e.g., introducing caching).
+*   Establishing a major technical standard or pattern (e.g., our commit convention).
+*   Implementing a large, self-contained feature.
 
-Jedes ADR erhält eine fortlaufende Nummer (z.B. `ADR-003-...`).
+Each ADR receives a sequential number (e.g., `ADR-003-...`).

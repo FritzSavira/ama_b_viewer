@@ -1,74 +1,74 @@
-# Feature Specification: Filtered Data Views
+# ADR-001: Filtered Data Views
 
-**Autor:** Gemini  
-**Datum:** 2025-07-27  
-**Status:** Proposed  
+**Author:** Gemini  
+**Date:** 2025-07-27  
+**Status:** Implemented  
 **Ticket:** VIEW-01
 
 ---
 
-## 1. Übersicht
+## 1. Summary
 
-Dieses Dokument beschreibt die Implementierung von gefilterten Sichten im MongoDB Datensatz Viewer. Ziel ist es, dem Benutzer zu ermöglichen, den angezeigten Datensatz auf bestimmte, relevante Abschnitte zu reduzieren, um die Analyse und Lesbarkeit zu verbessern.
+This document describes the implementation of filtered views in the MongoDB data viewer. The goal is to allow users to reduce the displayed dataset to specific, relevant sections to improve analysis and readability.
 
 ## 2. User Story
 
-**Als** Benutzer, der MongoDB-Datensätze analysiert,  
-**möchte ich** zwischen einer vollständigen Datenansicht und gefilterten Ansichten für "Question", "Answer" und "Tags" wechseln können,  
-**damit ich** mich schnell auf bestimmte Teile eines Datensatzes konzentrieren kann, ohne von irrelevanten Daten abgelenkt zu werden.
+**As a** user analyzing MongoDB records,  
+**I want to** be able to switch between a full data view and filtered views for "Question", "Answer", and "Tags",  
+**so that I** can quickly focus on specific parts of a record without being distracted by irrelevant data.
 
-## 3. Akzeptanzkriterien
+## 3. Acceptance Criteria
 
-- **AC-1: Tab-Navigation:** Eine Navigationsleiste mit den Tabs "All", "Question", "Answer" und "Tags" ist im Frontend sichtbar.
-- **AC-2: Standard-Sicht:** Die "All"-Sicht ist beim Laden der Seite standardmäßig aktiv und zeigt das vollständige, verschachtelte Dokument an.
-- **AC-3: "Question"-Sicht:** Die "Question"-Sicht zeigt ausschließlich den Inhalt des `question`-Objekts an. Ist dieses nicht vorhanden, wird eine entsprechende Meldung angezeigt.
-- **AC-4: "Answer"-Sicht:** Die "Answer"-Sicht zeigt ausschließlich den Inhalt des `answer`-Objekts an. Ist dieses nicht vorhanden, wird eine entsprechende Meldung angezeigt.
-- **AC-5: "Tags"-Sicht:** Die "Tags"-Sicht extrahiert und zeigt eine konsolidierte Liste der Werte aus allen Feldern an, die Listen/Arrays sind (z.B. `tags`, `hauptthemen`, `bibelreferenzen`).
-- **AC-6: Aktiver Zustand:** Der aktuell ausgewählte Tab ist visuell hervorgehoben.
-- **AC-7: Persistente Navigation:** Die "Vorheriger"- und "Nächster"-Buttons behalten die aktuell ausgewählte Sicht bei.
+- **AC-1: Tab Navigation:** A navigation bar with tabs for "All", "Question", "Answer", and "Tags" is visible in the frontend.
+- **AC-2: Default View:** The "All" view is active by default on page load and displays the complete, nested document.
+- **AC-3: "Question" View:** The "Question" view displays only the content of the `question` object. If it is not present, a corresponding message is shown.
+- **AC-4: "Answer" View:** The "Answer" view displays only the content of the `answer` object. If it is not present, a corresponding message is shown.
+- **AC-5: "Tags" View:** The "Tags" view extracts and displays a consolidated list of values from all fields that are lists/arrays (e.g., `tags`, `hauptthemen`, `bibelreferenzen`).
+- **AC-6: Active State:** The currently selected tab is visually highlighted.
+- **AC-7: Persistent Navigation:** The "Previous" and "Next" buttons maintain the currently selected view.
 
-## 4. Technischer Implementierungsplan
+## 4. Technical Implementation Plan
 
-Die Umsetzung erfolgt ohne den Einsatz von clientseitigem JavaScript. Die Logik wird serverseitig in Flask/Jinja2 abgebildet.
+The implementation is done without client-side JavaScript. The logic is handled server-side in Flask/Jinja2.
 
 ### 4.1. Backend (`main.py`)
 
-#### Task 4.1.1: Routen anpassen
+#### Task 4.1.1: Adapt Routes
 
-- Die Routen `@app.route('/')` und `@app.route('/view/<id>')` müssen einen optionalen URL-Query-Parameter `show` akzeptieren (z.B. `/view/some_id?show=question`).
-- Der Standardwert für `show` ist `'all'`.
-- Der `show`-Parameter wird an die `render_template()`-Funktion durchgereicht.
+- The routes `@app.route('/')` and `@app.route('/view/<id>')` must accept an optional URL query parameter `show` (e.g., `/view/some_id?show=question`).
+- The default value for `show` is `'all'`.
+- The `show` parameter is passed to the `render_template()` function.
 
-#### Task 4.1.2: Navigationslogik erweitern
+#### Task 4.1.2: Extend Navigation Logic
 
-- Die Funktionen `get_previous(id)` und `get_next(id)` müssen den `show`-Parameter aus den `request.args` auslesen.
-- Der `show`-Parameter muss in den `redirect(url_for(...))` Aufrufen weitergegeben werden, um den Zustand der Sicht bei der Navigation zu erhalten.
+- The `get_previous(id)` and `get_next(id)` functions must read the `show` parameter from `request.args`.
+- The `show` parameter must be passed in the `redirect(url_for(...))` calls to preserve the view state during navigation.
 
 ### 4.2. Frontend (`templates/index.html`)
 
-#### Task 4.2.1: Tab-Navigation implementieren
+#### Task 4.2.1: Implement Tab Navigation
 
-- Eine HTML-Struktur (z.B. `<nav>`) für die Tabs wird hinzugefügt.
-- Jeder Link verweist auf die URL des aktuellen Dokuments, ergänzt um den passenden `show`-Parameter.
+- An HTML structure (e.g., `<nav>`) for the tabs is added.
+- Each link points to the URL of the current document, appended with the appropriate `show` parameter.
   ```jinja
   <a href="{{ url_for('view_document', id=doc['_id'], show='question') }}">Question</a>
   ```
 
-#### Task 4.2.2: CSS für Tabs erstellen
+#### Task 4.2.2: Create CSS for Tabs
 
-- Die Navigations-Tabs werden mit CSS formatiert.
-- Eine `.active`-Klasse wird definiert, um den aktiven Tab hervorzuheben. Der `show`-Parameter wird genutzt, um diese Klasse dynamisch zu setzen.
+- The navigation tabs are styled with CSS.
+- An `.active` class is defined to highlight the active tab. The `show` parameter is used to set this class dynamically.
   ```jinja
   <a href="..." class="{{ 'active' if show == 'question' else '' }}">Question</a>
   ```
 
-#### Task 4.2.3: Bedingtes Rendern der Sichten
+#### Task 4.2.3: Conditional Rendering of Views
 
-- Der Haupt-Anzeigebereich wird durch einen `if/elif/else`-Block in Jinja2 gesteuert.
-- `{% if show == 'all' %}`: Rendert die bestehende rekursive Makro-Anzeige.
-- `{% elif show == 'question' %}`: Greift auf `doc.question` zu und rendert dessen Inhalt oder eine "Nicht gefunden"-Meldung.
-- `{% elif show == 'answer' %}`: Greift auf `doc.answer` zu und rendert dessen Inhalt oder eine "Nicht gefunden"-Meldung.
-- `{% elif show == 'tags' %}`: Implementiert eine Schleife, die durch das `doc`-Objekt iteriert, alle Listen-Felder findet und deren Inhalte anzeigt.
+- The main display area is controlled by an `if/elif/else` block in Jinja2.
+- `{% if show == 'all' %}`: Renders the existing recursive macro display.
+- `{% elif show == 'question' %}`: Accesses `doc.question` and renders its content or a "Not Found" message.
+- `{% elif show == 'answer' %}`: Accesses `doc.answer` and renders its content or a "Not Found" message.
+- `{% elif show == 'tags' %}`: Implements a loop that iterates through the `doc` object, finds all list fields, and displays their contents.
 
 ## 5. Development Workflow & Traceability
 

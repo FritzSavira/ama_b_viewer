@@ -159,11 +159,32 @@
             margin-right: 5px;
             margin-bottom: 5px;
         }
+
+        /* Dashboard & Chart Styles */
+        .chart-wrapper {
+            position: relative;
+            min-height: 300px; /* Ensures the wrapper has space for the spinner */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .loading-indicator, .error-message {
+            text-align: center;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
     <h2>{{ page_title }}</h2>
 
+    {% if doc %}
     <div class="navigation">
         <a href="{{ url_for('view_document', id=first_doc_id, show=show) if first_doc_id else '#' }}">First</a>
         <a href="{{ url_for('previous_document', id=doc._id, show=show) }}">Previous</a>
@@ -180,8 +201,12 @@
         <a href="{{ url_for('tags_dashboard') }}">Tags Dashboard</a>
         <a href="{{ url_for('network_graph_view') }}">Network Graph</a>
     </nav>
+{% endif %}
 
     {% block content %}
+    {% endblock %}
+
+    {% block scripts %}
     {% endblock %}
 </body>
 </html>

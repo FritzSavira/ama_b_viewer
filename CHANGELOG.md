@@ -52,7 +52,7 @@ Changed the page title displayed on each document view from the generic Document
 
 1.  **`main.py` Modifications:**
     *   The `view_document` function now safely attempts to extract `doc.question_abstraction.semantic.information_goal`.
-    *   If found, the `page_title` is set to "Fragestellung: " followed by the information goal. Otherwise, it defaults back to "Document ID: [ID]".
+    *   If found, the `page_title` is set to "Question: " followed by the information goal. Otherwise, it defaults back to "Document ID: [ID]".
     *   This `page_title` is passed to the template context.
 
 2.  **`templates/base.html` Modifications:**

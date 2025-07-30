@@ -1,30 +1,30 @@
 # Contributing to ama_b_viewer
 
-Vielen Dank für dein Interesse, an diesem Projekt mitzuwirken! Jede Hilfe ist willkommen. Um eine reibungslose Zusammenarbeit zu gewährleisten, bitten wir dich, die folgenden Richtlinien zu beachten.
+Thank you for your interest in contributing to this project! Any help is welcome. To ensure smooth collaboration, we ask you to adhere to the following guidelines.
 
-## Entwicklungs-Workflow
+## Development Workflow
 
-1.  **Fork & Branch**: Erstelle einen Fork des Repositories und erstelle einen neuen Branch für dein Feature oder deinen Bugfix.
-2.  **Implementierung**: Nimm deine Änderungen vor und halte dich dabei an den bestehenden Code-Stil.
-3.  **Dokumentation**: Wenn du eine wesentliche Änderung vornimmst (z.B. ein neues Feature hinzufügst oder die Architektur änderst), erstelle bitte einen neuen **Architectural Decision Record (ADR)** im Verzeichnis `docs/adr/`.
-4.  **Commits**: Schreibe aussagekräftige Commit-Nachrichten, die unserer Konvention entsprechen (siehe unten).
-5.  **Pull Request**: Erstelle einen Pull Request gegen den `main`-Branch des Haupt-Repositories.
+1.  **Fork & Branch**: Fork the repository and create a new branch for your feature or bug fix.
+2.  **Implementation**: Make your changes, adhering to the existing code style.
+3.  **Documentation**: If you make a significant change (e.g., adding a new feature or changing the architecture), please create a new **Architectural Decision Record (ADR)** in the `docs/adr/` directory.
+4.  **Commits**: Write meaningful commit messages that follow our convention (see below).
+5.  **Pull Request**: Create a pull request against the `main` branch of the main repository.
 
-## Commit-Message-Konvention
+## Commit Message Convention
 
-Alle Commits in diesem Projekt müssen der **Conventional Commits** Spezifikation folgen. Dies sorgt für einen klaren und nachvollziehbaren Git-Verlauf. Jeder Commit, der sich auf ein dokumentiertes Feature oder eine Aufgabe bezieht, sollte eine Ticket-ID enthalten.
+All commits in this project must follow the **Conventional Commits** specification. This ensures a clear and traceable Git history. Any commit related to a documented feature or task should include a ticket ID.
 
 **Format:**
 ```
 <type>(<scope>): <subject> (<ticket-id>)
 ```
 
-*   **`<type>`:** Beschreibt die Art der Änderung (z.B. `feat` für ein neues Feature, `fix` für einen Bugfix, `docs` für Dokumentation, `refactor` für Code-Überarbeitung).
-*   **`<scope>`:** Beschreibt den betroffenen Teil der Codebase (z.B. `backend`, `frontend`, `docs`, `db`).
-*   **`<subject>`:** Eine kurze, prägnante Beschreibung der Änderung in der Gegenwartsform.
-*   **`<ticket-id>`:** (Optional) Eine Referenz auf ein ADR (z.B. `ADR-001`) oder eine Aufgaben-ID (z.B. `TASK-3.2`).
+*   **`<type>`:** Describes the type of change (e.g., `feat` for a new feature, `fix` for a bug fix, `docs` for documentation, `refactor` for code refactoring).
+*   **`<scope>`:** Describes the part of the codebase affected (e.g., `backend`, `frontend`, `docs`, `db`).
+*   **`<subject>`:** A short, concise description of the change in the present tense.
+*   **`<ticket-id>`:** (Optional) A reference to an ADR (e.g., `ADR-001`) or a task ID (e.g., `TASK-3.2`).
 
-**Beispiel:**
+**Example:**
 ```
 feat(backend): Add 'show' URL parameter to view routes (ADR-001)
 ```
