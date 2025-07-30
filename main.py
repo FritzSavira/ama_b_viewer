@@ -39,6 +39,10 @@ try:
 except Exception as e:
     raise RuntimeError(f"Error connecting to MongoDB: {e}")
 
+# Global constants for collection names
+SOURCE_COLLECTION = "ama_log"
+MAPPINGS_COLLECTION = "category_mappings"
+
 def get_collection_schema(collection):
     """Analyzes the collection to get a set of all unique field paths."""
     fields = set()
@@ -181,37 +185,77 @@ def previous_document(id):
     else:
         return "No previous document", 404
 
-def _aggregate_field(field_path):
+def _aggregate_field(field_path, apply_mapping=False):
     pipeline = [
         {
             "$match": {
                 field_path: {"$exists": True, "$ne": None, "$ne": ""}
             }
-        },
-        {
+        }
+    ]
+
+    # Check if the field is an array (e.g., tags.hauptthemen) and needs unwinding
+    # This is a heuristic; a more robust solution would involve schema analysis
+    if field_path.startswith("tags."):
+        pipeline.append({"$unwind": f"${field_path}"})
+        # Ensure the unwound field is not empty after unwind
+        pipeline.append({"$match": {field_path: {"$ne": None, "$ne": ""}}})
+
+    if apply_mapping:
+        # Add $lookup stage to join with the category_mappings collection
+        pipeline.append({
+            "$lookup": {
+                "from": MAPPINGS_COLLECTION,
+                "localField": field_path,
+                "foreignField": "_id",
+                "as": "mapping_data"
+            }
+        })
+        # Add $addFields stage to use the mapped value if available, otherwise the original
+        pipeline.append({
+            "$addFields": {
+                "_id_normalized": {
+                    "$cond": {
+                        "if": {"$gt": [{"$size": "$mapping_data"}, 0]},
+                        "then": {"$arrayElemAt": ["$mapping_data.target", 0]},
+                        "else": f"${field_path}"
+                    }
+                }
+            }
+        })
+        # Group by the normalized field
+        pipeline.append({
+            "$group": {
+                "_id": "$_id_normalized",
+                "count": {"$sum": 1}
+            }
+        })
+    else:
+        # Group by the original field
+        pipeline.append({
             "$group": {
                 "_id": f"${field_path}",
                 "count": {"$sum": 1}
             }
-        },
-        {
-            "$sort": {
-                "count": -1
-            }
+        })
+
+    pipeline.append({
+        "$sort": {
+            "count": -1
         }
-    ]
-    return list(collection.aggregate(pipeline))
+    })
+    return list(db[SOURCE_COLLECTION].aggregate(pipeline))
 
 @app.route('/api/questions_categorization')
 def get_questions_categorization():
     data = {
-        "category": _aggregate_field("question_abstraction.categorization.category"),
-        "subcategory": _aggregate_field("question_abstraction.categorization.subcategory"),
-        "type": _aggregate_field("question_abstraction.categorization.type"),
-        "complexity": _aggregate_field("question_abstraction.categorization.complexity"),
-        "main_goal": _aggregate_field("question_abstraction.intent.main_goal"),
-        "information_goal": _aggregate_field("question_abstraction.semantic.information_goal"),
-        "domain": _aggregate_field("question_abstraction.semantic.domain")
+        "category": _aggregate_field("question_abstraction.categorization.category", apply_mapping=True),
+        "subcategory": _aggregate_field("question_abstraction.categorization.subcategory", apply_mapping=True),
+        "type": _aggregate_field("question_abstraction.categorization.type", apply_mapping=True),
+        "complexity": _aggregate_field("question_abstraction.categorization.complexity", apply_mapping=False), # No mapping for complexity
+        "main_goal": _aggregate_field("question_abstraction.intent.main_goal", apply_mapping=True),
+        "information_goal": _aggregate_field("question_abstraction.semantic.information_goal", apply_mapping=True),
+        "domain": _aggregate_field("question_abstraction.semantic.domain", apply_mapping=True)
     }
     return jsonify(data)
 
@@ -223,28 +267,12 @@ def get_tag_frequency(tag_type):
 
     field_path = f"tags.{tag_type}"
 
-    pipeline = [
-        {
-            "$match": {
-                field_path: {"$exists": True, "$ne": [], "$ne": None}
-            }
-        },
-        {
-            "$unwind": f"${field_path}"
-        },
-        {
-            "$group": {
-                "_id": f"${field_path}",
-                "count": {"$sum": 1}
-            }
-        },
-        {
-            "$sort": {
-                "count": -1
-            }
-        }
-    ]
-    results = list(collection.aggregate(pipeline))
+    # Bibelreferenzen should not be mapped
+    if tag_type == "bibelreferenzen":
+        results = _aggregate_field(field_path, apply_mapping=False)
+    else:
+        results = _aggregate_field(field_path, apply_mapping=True)
+
     return jsonify(results)
 
 def generate_network_data():
@@ -280,7 +308,7 @@ def generate_network_data():
             }
         }
     ]
-    links_data = list(collection.aggregate(links_pipeline))
+    links_data = list(db[SOURCE_COLLECTION].aggregate(links_pipeline))
 
     # Extract unique nodes from the links data
     nodes_set = set()
@@ -330,6 +358,3 @@ def network_graph_view():
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
-
-
-

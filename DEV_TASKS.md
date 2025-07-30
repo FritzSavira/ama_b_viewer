@@ -84,3 +84,72 @@ This document tracks the development tasks for the `ama_b_viewer` project.
   - **description:** Create technical documentation for backend endpoints and frontend components.
   - **status:** pending
   - **reference:** `docs/adr/ADR-002-Data-Visualization-Suite.md`
+
+## Phase 4: LLM-Powered Semantic Aggregation
+
+- [ ] **TASK-4.1:** Setup Environment and Infrastructure
+  - **description:** Add `aio_straico` to `requirements.txt`. Create a new script file `llm_mapper.py`. Ensure the `category_mappings` collection exists in MongoDB.
+  - **status:** pending
+  - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
+
+- [ ] **TASK-4.2:** Implement Logic to Find Unmapped Terms
+  - **description:** In `llm_mapper.py`, implement a function that gets all unique terms from the relevant fields in `ama_log` and compares them against the `_id`s in `category_mappings` to produce a list of new, unmapped terms.
+  - **status:** pending
+  - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
+
+- [ ] **TASK-4.3:** Implement LLM Prompting and API Call
+  - **description:** In `llm_mapper.py`, create a function that takes the list of new terms, constructs a prompt asking the LLM to return a JSON object mapping each term to a canonical form, and calls the `straico_client` API with the model `anthropic/claude-3.5-sonnet`.
+  - **status:** pending
+  - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
+
+- [ ] **TASK-4.4:** Implement LLM Response Processing and DB Update
+  - **description:** In `llm_mapper.py`, implement a function that parses the JSON response from the LLM. For each `original_term: canonical_term` pair, it should perform an `update_one` with `upsert=True` on the `category_mappings` collection.
+  - **status:** pending
+  - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
+
+- [x] **TASK-4.5:** Refactor Aggregation Pipelines to Use Mappings
+  - **description:** Modified the aggregation pipelines in the API endpoints (`/api/questions_categorization`, `/api/tag_frequency`) to use `$lookup` on the `category_mappings` collection and normalize the data before counting.
+  - **status:** completed
+  - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
+
+- [ ] **TASK-4.8:** Implement Manual LLM Mapping Trigger in UI
+  - **description:** Add a button to the dashboard views (e.g., Questions Dashboard, Tags Dashboard) that, when clicked, triggers the execution of the `llm_mapper.py` script to perform category mapping.
+  - **status:** pending
+  - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
+
+- [ ] **TASK-4.6:** Finalize `llm_mapper.py` for Periodic Execution
+  - **description:** Assemble the functions from previous tasks into a main, executable block. Add logging and command-line arguments (e.g., `--dry-run`) for safe and transparent execution.
+  - **status:** pending
+  - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
+
+- [x] **TASK-4.7:** Create New ADR for this Feature
+  - **description:** Document the problem, the chosen LLM-based solution, and the implementation details in a new file: `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`.
+  - **status:** completed
+  - **reference:** `(self)`
+
+## Phase 4: Semantic Category Aggregation
+
+- [ ] **TASK-4.1:** Create MongoDB Infrastructure for Mappings
+  - **description:** Set up a new, dedicated collection named `category_mappings` to store the normalization rules.
+  - **status:** pending
+  - **reference:** `docs/adr/ADR-003-Semantic-Category-Aggregation.md`
+
+- [ ] **TASK-4.2:** Implement Analysis Script for Category Values
+  - **description:** Create a script to extract all unique values and their frequencies for the relevant fields (`category`, `subcategory`, `type`, `domain`, `hauptthemen`, `theologische_konzepte`).
+  - **status:** pending
+  - **reference:** `docs/adr/ADR-003-Semantic-Category-Aggregation.md`
+
+- [ ] **TASK-4.3:** Define and Populate Initial Mapping Rules
+  - **description:** Based on the analysis from TASK-4.2, define the initial set of mapping rules and populate them into the `category_mappings` collection.
+  - **status:** pending
+  - **reference:** `docs/adr/ADR-003-Semantic-Category-Aggregation.md`
+
+- [ ] **TASK-4.4:** Refactor Aggregation Pipelines to Use Mappings
+  - **description:** Modify the aggregation pipelines in the API endpoints (`/api/questions_categorization`, `/api/tag_frequency`) to use `$lookup` on the `category_mappings` collection and normalize the data before counting.
+  - **status:** pending
+  - **reference:** `docs/adr/ADR-003-Semantic-Category-Aggregation.md`
+
+- [ ] **TASK-4.5:** Create a New ADR for this Feature
+  - **description:** Document the problem, the chosen solution (MongoDB collection + `$lookup`), and the implementation details in a new file: `docs/adr/ADR-003-Semantic-Category-Aggregation.md`.
+  - **status:** pending
+  - **reference:** `(self)`
