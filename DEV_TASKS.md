@@ -87,24 +87,24 @@ This document tracks the development tasks for the `ama_b_viewer` project.
 
 ## Phase 4: LLM-Powered Semantic Aggregation
 
-- [ ] **TASK-4.1:** Setup Environment and Infrastructure
-  - **description:** Add `aio_straico` to `requirements.txt`. Create a new script file `llm_mapper.py`. Ensure the `category_mappings` collection exists in MongoDB.
-  - **status:** pending
+- [x] **TASK-4.1:** Setup Environment and Infrastructure
+  - **description:** Ensure `aio_straico` is in `requirements.txt` and `llm_mapper.py` exists. Verify MongoDB connection and collections.
+  - **status:** completed
   - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
 
-- [ ] **TASK-4.2:** Implement Logic to Find Unmapped Terms
+- [x] **TASK-4.2:** Implement Logic to Find Unmapped Terms
   - **description:** In `llm_mapper.py`, implement a function that gets all unique terms from the relevant fields in `ama_log` and compares them against the `_id`s in `category_mappings` to produce a list of new, unmapped terms.
-  - **status:** pending
+  - **status:** completed
   - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
 
-- [ ] **TASK-4.3:** Implement LLM Prompting and API Call
+- [x] **TASK-4.3:** Implement LLM Prompting and API Call
   - **description:** In `llm_mapper.py`, create a function that takes the list of new terms, constructs a prompt asking the LLM to return a JSON object mapping each term to a canonical form, and calls the `straico_client` API with the model `anthropic/claude-3.5-sonnet`.
-  - **status:** pending
+  - **status:** completed
   - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
 
-- [ ] **TASK-4.4:** Implement LLM Response Processing and DB Update
+- [x] **TASK-4.4:** Implement LLM Response Processing and DB Update
   - **description:** In `llm_mapper.py`, implement a function that parses the JSON response from the LLM. For each `original_term: canonical_term` pair, it should perform an `update_one` with `upsert=True` on the `category_mappings` collection.
-  - **status:** pending
+  - **status:** completed
   - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
 
 - [x] **TASK-4.5:** Refactor Aggregation Pipelines to Use Mappings
@@ -112,14 +112,19 @@ This document tracks the development tasks for the `ama_b_viewer` project.
   - **status:** completed
   - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
 
-- [ ] **TASK-4.8:** Implement Manual LLM Mapping Trigger in UI
-  - **description:** Add a button to the dashboard views (e.g., Questions Dashboard, Tags Dashboard) that, when clicked, triggers the execution of the `llm_mapper.py` script to perform category mapping.
-  - **status:** pending
+- [x] **TASK-4.8-BE:** Implement Backend for Manual LLM Mapping Trigger
+  - **description:** In `main.py`, create a `/api/trigger_llm_mapping` endpoint that imports and runs the mapping logic from `llm_mapper.py` in a background thread. Also create a `/api/llm_mapping_status` endpoint for the frontend to poll. Implement a locking mechanism to prevent concurrent runs.
+  - **status:** completed
   - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
 
-- [ ] **TASK-4.6:** Finalize `llm_mapper.py` for Periodic Execution
-  - **description:** Assemble the functions from previous tasks into a main, executable block. Add logging and command-line arguments (e.g., `--dry-run`) for safe and transparent execution.
-  - **status:** pending
+- [x] **TASK-4.8-FE:** Implement Frontend for Manual LLM Mapping Trigger
+  - **description:** Add a button to a dashboard (e.g., `tags_dashboard.html`). Implement JavaScript to call the trigger endpoint, poll the status endpoint, and provide visual feedback to the user (e.g., loading indicators, success/error messages).
+  - **status:** completed
+  - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
+
+- [x] **TASK-4.9:** Final Testing and Refinement
+  - **description:** Thoroughly test the end-to-end mapping process. Refine error handling and user feedback.
+  - **status:** completed
   - **reference:** `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md`
 
 - [x] **TASK-4.7:** Create New ADR for this Feature

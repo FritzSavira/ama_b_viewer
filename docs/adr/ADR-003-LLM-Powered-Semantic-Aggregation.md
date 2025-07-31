@@ -1,7 +1,7 @@
 # ADR-003: LLM-Powered Semantic Aggregation
 
 **Status:** Accepted and Implemented
-**Date:** 2025-07-30
+**Date:** 2025-07-31
 
 ## 1. Context
 
@@ -11,14 +11,14 @@ The `ama_log` collection contains various categorical fields (e.g., `subcategory
 
 We will implement an LLM-powered semantic aggregation system to automatically normalize these varying terms into a single, canonical representation for visualization purposes. This system will involve:
 
-1.  **A dedicated MongoDB `category_mappings` collection:** To store the `original_term` to `canonical_term` mappings, along with the `field` they apply to.
+1.  **A dedicated MongoDB `category_mappings` collection:** To store the `original_term` to `canonical_term` mappings.
 2.  **An `llm_mapper.py` script:** This script will:
     *   Identify new, unmapped terms from the `ama_log` collection.
-    *   Send these terms to an LLM (Anthropic Claude 3.5 Sonnet via `aio_straico`) with a prompt to generate canonical mappings in JSON format.
+    *   Send these terms to an LLM (Anthropic Claude 3.5 Sonnet via `aio_straico`) with a prompt to generate canonical mappings in JSON format. The prompt explicitly instructs the LLM to prioritize existing canonical terms (passed as context) and to generate new canonical terms in German.
+    *   Process terms in batches to improve reliability and prevent timeouts.
     *   Persist these LLM-generated mappings into the `category_mappings` collection.
 3.  **Modification of Flask API aggregation pipelines:** The existing MongoDB aggregation pipelines (`/api/questions_categorization`, `/api/tag_frequency`) will be updated to use a `$lookup` stage with the `category_mappings` collection. This will replace original terms with their canonical forms before final grouping and counting.
-
-This process will be triggered periodically (e.g., via a cron job) to keep mappings up-to-date, and a manual trigger will be provided in the UI.
+4.  **Manual Trigger via UI:** The process will be triggered manually from the UI (e.g., Tags Dashboard) via a dedicated backend API endpoint. The backend process runs in a background thread, and its status can be monitored via another API endpoint.
 
 ## 3. Consequences
 
@@ -28,6 +28,7 @@ This process will be triggered periodically (e.g., via a cron job) to keep mappi
 *   **Scalability:** The system can handle new term variations without requiring manual intervention for each one.
 *   **Flexibility:** Mappings are stored in MongoDB, allowing for easy review, modification, or deletion if the LLM makes an incorrect mapping.
 *   **Original Data Integrity:** The `ama_log` collection remains unchanged; normalization only occurs during aggregation for visualization.
+*   **Enhanced Consistency:** By providing existing canonical terms to the LLM, the system promotes higher consistency in generated mappings.
 
 ### Negative
 *   **LLM Dependency & Cost:** Relies on an external LLM service, incurring API costs and potential latency.

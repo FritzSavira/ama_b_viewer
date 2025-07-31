@@ -17,6 +17,7 @@ DB_NAME = "ama_browser"  # Explicitly set the correct database name
 SOURCE_COLLECTION = "ama_log"
 MAPPINGS_COLLECTION = "category_mappings"
 LLM_MODEL = 'anthropic/claude-3.5-sonnet'
+#LLM_MODEL = 'google/gemini-2.5-flash'
 
 # Fields to be analyzed for mapping
 FIELDS_TO_MAP = [
@@ -58,7 +59,7 @@ def get_unmapped_terms(db, field_path):
             print(f"Mappings collection '{MAPPINGS_COLLECTION}' does not exist. Assuming 0 mappings.")
             mapped_terms = set()
         else:
-            mapped_terms = {doc['_id'] for doc in db[MAPPINGS_COLLECTION].find({'field': field_path}, {'_id': 1})}
+            mapped_terms = {doc['_id'] for doc in db[MAPPINGS_COLLECTION].find({}, {'_id': 1})}
         print(f"Found {len(mapped_terms)} existing mappings.")
     except Exception as e:
         print(f"Error fetching mapped terms for {field_path}: {e}")
@@ -70,36 +71,60 @@ def get_unmapped_terms(db, field_path):
     return unmapped_terms
 
 
-def get_mappings_from_llm(terms_to_map):
-    """Sends a list of terms to an LLM and requests mappings to a canonical form."""
+def get_mappings_from_llm(terms_to_map, existing_canons=None, batch_size=200):
+    """Sends a list of terms to an LLM in batches and requests mappings to a canonical form."""
     if not terms_to_map:
         print("No new terms to map. Skipping LLM call.")
         return {}
 
-    print(f"\n--- Sending {len(terms_to_map)} terms to LLM for mapping ---")
+    print(f"\n--- Sending {len(terms_to_map)} terms to LLM for mapping in batches of {batch_size} ---")
+    all_mappings = {}
 
-    prompt = f"""Analyze the following list of categories. Some are duplicates or variations of each other (e.g., 'Bibelauslegung', 'Biblische Exegese'). 
-Your task is to create a JSON object that maps each of these terms to a single, consistent, canonical form. 
-Use the most common or descriptive term as the canonical form. 
+    # Construct the base of the prompt with instructions
+    prompt_base = f"""Analyze the following list of categories. Some are duplicates or variations of each other.
+Your task is to create a JSON object that maps each of these terms to a single, consistent, canonical form.
 
-The list of terms is:
-{json.dumps(terms_to_map, indent=2)}
+**IMPORTANT INSTRUCTIONS:**
+1. The canonical terms you generate MUST be in German.
+2. You have been provided with a list of preferred canonical terms (also in German). You MUST prioritize using a term from this list if a suitable one exists.
+3. Only create a brand new canonical term if none of the preferred terms are a good fit.
+"""
+
+    if existing_canons:
+        prompt_base += f"""\n**PREFERRED CANONICAL TERMS (in German):**
+{json.dumps(existing_canons, indent=2)}
+"""
+
+    for i in range(0, len(terms_to_map), batch_size):
+        batch = terms_to_map[i:i + batch_size]
+        print(f"Processing batch {i // batch_size + 1}/{(len(terms_to_map) + batch_size - 1) // batch_size}...")
+
+        # Add the new terms to the prompt for the current batch
+        prompt = prompt_base + f"""\n**NEW TERMS TO MAP:**
+{json.dumps(batch, indent=2)}
 
 Respond with ONLY the JSON object, like this: {{\"original_term_1\": \"canonical_term_1\", \"original_term_2\": \"canonical_term_1\", ...}}."""
 
-    try:
-        with straico_client(API_KEY=STRAICO_API_KEY) as client:
-            print("Awaiting response from LLM...")
-            reply = client.prompt_completion(LLM_MODEL, prompt)
-            response_content = reply['completion']['choices'][0]['message']['content']
-            print("LLM response received.")
-            
-            mappings = json.loads(response_content)
-            return mappings
+        try:
+            # Set a reasonable timeout for the client initialization
+            with straico_client(API_KEY=STRAICO_API_KEY, timeout=120) as client: # 2-minute timeout
+                print("Awaiting response from LLM for batch...")
+                reply = client.prompt_completion(LLM_MODEL, prompt)
+                response_content = reply['completion']['choices'][0]['message']['content']
+                print("LLM response for batch received.")
+                
+                batch_mappings = json.loads(response_content)
+                all_mappings.update(batch_mappings)
 
-    except Exception as e:
-        print(f"An error occurred during the LLM API call: {e}")
-        return None
+        except Exception as e:
+            print(f"An error occurred during the LLM API call for a batch: {e}")
+            # We can decide to either stop or continue with the next batch.
+            # For now, we'll just print the error and continue.
+            pass
+
+    return all_mappings
+
+
 
 
 def save_mappings_to_db(db, field_path, mappings):
@@ -114,7 +139,7 @@ def save_mappings_to_db(db, field_path, mappings):
     for original_term, canonical_term in mappings.items():
         # Use upsert=True to insert if not exists, or update if exists
         result = mappings_collection.update_one(
-            {'_id': original_term, 'field': field_path},
+            {'_id': original_term},
             {'$set': {'target': canonical_term}},
             upsert=True
         )

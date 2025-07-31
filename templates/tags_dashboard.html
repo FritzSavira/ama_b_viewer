@@ -11,6 +11,19 @@
     <div class="container">
         <h1 class="mb-4">Tag Analysis (Frequency)</h1>
 
+        <div class="card bg-light mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Semantic Mapping Management</h5>
+                <p class="card-text">Improve data consistency by running the LLM-powered mapping process. This will find new, unmapped tags and assign them to a canonical form.</p>
+                <button id="triggerMappingBtn" class="btn btn-info">Update Tag Mappings</button>
+                <div id="mappingStatus" class="mt-2"></div>
+                <div class="progress mt-2" style="display: none;">
+                    <div id="mappingProgressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="form-text text-muted">After the process is finished, please reload the page to see the updated charts.</small>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-6 mb-4">
                 <h2>Biblical References</h2>
@@ -130,6 +143,91 @@
             loadChart('bibelreferenzen-chart-wrapper', '/api/tag_frequency/bibelreferenzen', 'bibelreferenzenChart', 'Frequency of Biblical References', 20);
             loadChart('hauptthemen-chart-wrapper', '/api/tag_frequency/hauptthemen', 'hauptthemenChart', 'Frequency of Main Themes', 10);
             loadChart('theologische-konzepte-chart-wrapper', '/api/tag_frequency/theologische_konzepte', 'theologischeKonzepteChart', 'Frequency of Theological Concepts', 10);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const triggerBtn = document.getElementById('triggerMappingBtn');
+            const statusDiv = document.getElementById('mappingStatus');
+            const progressContainer = document.querySelector('.progress');
+            const progressBar = document.getElementById('mappingProgressBar');
+            let pollingInterval;
+
+            function setButtonState(isLoading) {
+                if (isLoading) {
+                    triggerBtn.disabled = true;
+                    triggerBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+                } else {
+                    triggerBtn.disabled = false;
+                    triggerBtn.innerHTML = 'Update Tag Mappings';
+                }
+            }
+
+            function updateStatus(message, progress = 0, total = 0) {
+                statusDiv.textContent = message;
+                if (total > 0 && progress > 0) {
+                    const percentage = Math.round((progress / total) * 100);
+                    progressContainer.style.display = 'block';
+                    progressBar.style.width = percentage + '%';
+                    progressBar.textContent = percentage + '%';
+                    progressBar.setAttribute('aria-valuenow', percentage);
+                } else {
+                    progressContainer.style.display = 'none';
+                }
+            }
+
+            function pollStatus() {
+                fetch('/api/llm_mapping_status')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateStatus(data.message, data.progress, data.total);
+
+                        if (data.status === 'running') {
+                            setButtonState(true);
+                        } else if (data.status === 'finished' || data.status === 'error') {
+                            clearInterval(pollingInterval);
+                            setButtonState(false);
+                            if (data.status === 'finished') {
+                                statusDiv.className = 'mt-2 text-success';
+                            } else {
+                                statusDiv.className = 'mt-2 text-danger';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error polling status:', error);
+                        updateStatus('Error fetching status. Please check the console.');
+                        statusDiv.className = 'mt-2 text-danger';
+                        clearInterval(pollingInterval);
+                        setButtonState(false);
+                    });
+            }
+
+            triggerBtn.addEventListener('click', function() {
+                setButtonState(true);
+                statusDiv.className = 'mt-2 text-info';
+                updateStatus('Initiating mapping process...');
+
+                fetch('/api/trigger_llm_mapping', { method: 'POST' })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw new Error(err.message || 'Failed to start process.'); });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        updateStatus(data.message);
+                        pollingInterval = setInterval(pollStatus, 2000); // Poll every 2 seconds
+                    })
+                    .catch(error => {
+                        console.error('Error triggering mapping:', error);
+                        updateStatus(error.message);
+                        statusDiv.className = 'mt-2 text-danger';
+                        setButtonState(false);
+                    });
+            });
+
+            // Initial check in case a process is already running when the page loads
+            pollStatus();
         });
     </script>
     {% endblock %}

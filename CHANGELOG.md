@@ -1,5 +1,31 @@
 # Development Log
 
+## 2025-07-31 - Feature: LLM-Powered Semantic Aggregation
+
+### Overview
+Implemented a robust LLM-powered system to automatically normalize varying categorical terms (tags, categories) into consistent, canonical forms. This significantly improves data quality and consistency in visualizations.
+
+### Key Changes & Rationale
+
+1.  **Backend (`main.py`, `llm_mapper.py`):**
+    *   Introduced new API endpoints: `/api/trigger_llm_mapping` (POST) to initiate the process and `/api/llm_mapping_status` (GET) to monitor its progress.
+    *   The mapping process now runs in a background thread, ensuring the UI remains responsive.
+    *   `llm_mapper.py` was enhanced to process terms in batches, significantly improving reliability and preventing timeouts for large datasets.
+    *   The LLM prompt was refined to include existing canonical terms, guiding the LLM towards higher consistency and ensuring canonical terms are generated in German.
+    *   Robust error handling and status reporting were implemented to provide clear feedback on the process state.
+    *   A dedicated `category_mappings` MongoDB collection stores the `original_term` to `canonical_term` mappings.
+
+2.  **Frontend (`tags_dashboard.html`):**
+    *   Added a "Update Tag Mappings" button to the Tags Dashboard.
+    *   Implemented JavaScript logic to trigger the backend process, poll its status, and display real-time progress and messages (including success/error states) to the user.
+
+### Files Modified
+*   `main.py`
+*   `llm_mapper.py`
+*   `tags_dashboard.html`
+*   `DEV_TASKS.md` (updated status)
+*   `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md` (updated status)
+
 ## 2025-07-28 - Refactor: Menu Order and Question View Removal
 
 ### Overview

@@ -356,5 +356,103 @@ def tags_dashboard():
 def network_graph_view():
     return render_template('bible_theme_network.html')
 
+# --- LLM-Powered Semantic Aggregation ---
+import threading
+from llm_mapper import get_db as get_mapper_db, get_unmapped_terms, get_mappings_from_llm, save_mappings_to_db, FIELDS_TO_MAP
+
+# Global state to track the mapping process
+llm_mapping_status = {
+    "status": "idle",  # Can be "idle", "running", "finished", "error"
+    "message": "Process has not been started yet.",
+    "progress": 0,
+    "total": 0
+}
+
+def run_llm_mapping_process():
+    """The actual mapping process, designed to be run in a background thread."""
+    global llm_mapping_status
+    had_errors = False
+    
+    try:
+        print("Background mapping process started.")
+        db = get_mapper_db()
+        
+        # 1. Get the list of already existing canonical terms
+        print("Fetching existing canonical terms...")
+        existing_canons = list(db[MAPPINGS_COLLECTION].distinct("target"))
+        print(f"Found {len(existing_canons)} unique canonical terms.")
+
+        llm_mapping_status['total'] = len(FIELDS_TO_MAP)
+        llm_mapping_status['progress'] = 0
+
+        for i, field in enumerate(FIELDS_TO_MAP):
+            llm_mapping_status['message'] = f"Analyzing field: {field}"
+            print(f"Processing field ({i+1}/{len(FIELDS_TO_MAP)}): {field}")
+
+            new_terms = get_unmapped_terms(db, field)
+            
+            if new_terms:
+                llm_mapping_status['message'] = f"Found {len(new_terms)} new terms for '{field}'. Sending to LLM."
+                # 2. Pass the existing canons to the LLM function
+                llm_mappings = get_mappings_from_llm(new_terms, existing_canons=existing_canons)
+                
+                if llm_mappings:
+                    llm_mapping_status['message'] = f"Saving {len(llm_mappings)} new mappings for '{field}'."
+                    save_mappings_to_db(db, field, llm_mappings)
+                    # 3. Update our list of canons with any new ones that might have been created
+                    for target in llm_mappings.values():
+                        if target not in existing_canons:
+                            existing_canons.append(target)
+                else:
+                    print(f"No mappings returned from LLM for field: {field}. This may indicate an API error.")
+                    had_errors = True # Mark that an error occurred
+            else:
+                print(f"No new terms to map for field: {field}")
+
+            llm_mapping_status['progress'] = i + 1
+
+        if had_errors:
+            llm_mapping_status['status'] = 'error'
+            llm_mapping_status['message'] = "Process completed with errors. Some terms could not be mapped."
+            print("Background mapping process finished with errors.")
+        else:
+            llm_mapping_status['status'] = 'finished'
+            llm_mapping_status['message'] = f"Mapping process completed successfully. Processed {len(FIELDS_TO_MAP)} fields."
+            print("Background mapping process finished successfully.")
+
+    except Exception as e:
+        error_message = f"A critical error occurred during the mapping process: {e}"
+        print(error_message)
+        llm_mapping_status['status'] = 'error'
+        llm_mapping_status['message'] = error_message
+
+@app.route('/api/trigger_llm_mapping', methods=['POST'])
+def trigger_llm_mapping():
+    """Triggers the LLM mapping process in a background thread."""
+    global llm_mapping_status
+
+    if llm_mapping_status['status'] == 'running':
+        return jsonify({"message": "Mapping process is already running."}), 409  # 409 Conflict
+
+    llm_mapping_status = {
+        "status": "running",
+        "message": "Mapping process started...",
+        "progress": 0,
+        "total": 0
+    }
+    
+    # Start the background thread
+    thread = threading.Thread(target=run_llm_mapping_process)
+    thread.start()
+
+    return jsonify({"message": "Mapping process initiated successfully."}), 202 # 202 Accepted
+
+@app.route('/api/llm_mapping_status')
+def get_llm_mapping_status():
+    """Returns the current status of the LLM mapping process."""
+    global llm_mapping_status
+    return jsonify(llm_mapping_status)
+
+
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)
