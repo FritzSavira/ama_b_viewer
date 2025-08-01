@@ -1,5 +1,109 @@
 # Development Log
 
+## 2025-08-01 - Feature: Document Deletion Functionality
+
+### Overview
+Implemented the ability to delete individual documents from the MongoDB Atlas collection directly from the UI, enhancing data management capabilities.
+
+### Key Changes & Rationale
+
+1.  **Backend (`main.py`):**
+    *   Added a new POST endpoint `/delete/<id>` to handle document deletion requests.
+    *   Implemented logic to delete the document by its `_id`.
+    *   After successful deletion, the user is redirected to the next available document (if any), or to the previous document, or to the home page if no other documents exist.
+    *   Includes basic error handling for deletion failures.
+
+2.  **Frontend (`templates/base.html`):**
+    *   Added a `[Delete]` button to the document navigation bar.
+    *   Implemented client-side JavaScript with a confirmation dialog to prevent accidental deletions.
+    *   The JavaScript sends a POST request to the backend endpoint and handles redirection based on the backend's response.
+
+### Files Modified
+*   `main.py`
+*   `templates/base.html`
+*   `docs/adr/ADR-005-Document-Deletion-Functionality.md` (referenced)
+*   `docs/DEV_TASKS.md` (updated status)
+
+
+
+## 2025-08-01 - Feature: Document Deletion Functionality
+
+### Overview
+Implemented the ability to delete individual documents from the MongoDB Atlas collection directly from the UI, enhancing data management capabilities.
+
+### Key Changes & Rationale
+
+1.  **Backend (`main.py`):**
+    *   Added a new POST endpoint `/delete/<id>` to handle document deletion requests.
+    *   Implemented logic to delete the document by its `_id`.
+    *   After successful deletion, the user is redirected to the next available document (if any), or to the previous document, or to the home page if no other documents exist.
+    *   Includes basic error handling for deletion failures.
+
+2.  **Frontend (`templates/base.html`):**
+    *   Added a `[Delete]` button to the document navigation bar.
+    *   Implemented client-side JavaScript with a confirmation dialog to prevent accidental deletions.
+    *   The JavaScript sends a POST request to the backend endpoint and handles redirection based on the backend's response.
+
+### Files Modified
+*   `main.py`
+*   `templates/base.html`
+*   `docs/adr/ADR-005-Document-Deletion-Functionality.md` (referenced)
+*   `docs/DEV_TASKS.md` (updated status)
+
+
+
+## 2025-08-01 - Feature: Document Deletion Functionality
+
+### Overview
+Implemented the ability to delete individual documents from the MongoDB Atlas collection directly from the UI, enhancing data management capabilities.
+
+### Key Changes & Rationale
+
+1.  **Backend (`main.py`):**
+    *   Added a new POST endpoint `/delete/<id>` to handle document deletion requests.
+    *   Implemented logic to delete the document by its `_id`.
+    *   After successful deletion, the user is redirected to the next available document (if any), or to the previous document, or to the home page if no other documents exist.
+    *   Includes basic error handling for deletion failures.
+
+2.  **Frontend (`templates/base.html`):**
+    *   Added a `[Delete]` button to the document navigation bar.
+    *   Implemented client-side JavaScript with a confirmation dialog to prevent accidental deletions.
+    *   The JavaScript sends a POST request to the backend endpoint and handles redirection based on the backend's response.
+
+### Files Modified
+*   `main.py`
+*   `templates/base.html`
+*   `docs/adr/ADR-005-Document-Deletion-Functionality.md` (referenced)
+*   `docs/DEV_TASKS.md` (updated status)
+
+
+
+## 2025-08-01 - Feature: Document Deletion Functionality
+
+### Overview
+Implemented the ability to delete individual documents from the MongoDB Atlas collection directly from the UI, enhancing data management capabilities.
+
+### Key Changes & Rationale
+
+1.  **Backend (`main.py`):**
+    *   Added a new POST endpoint `/delete/<id>` to handle document deletion requests.
+    *   Implemented logic to delete the document by its `_id`.
+    *   After successful deletion, the user is redirected to the next available document (if any), or to the previous document, or to the home page if no other documents exist.
+    *   Includes basic error handling for deletion failures.
+
+2.  **Frontend (`templates/base.html`):**
+    *   Added a `[Delete]` button to the document navigation bar.
+    *   Implemented client-side JavaScript with a confirmation dialog to prevent accidental deletions.
+    *   The JavaScript sends a POST request to the backend endpoint and handles redirection based on the backend's response.
+
+### Files Modified
+*   `main.py`
+*   `templates/base.html`
+*   `docs/adr/ADR-005-Document-Deletion-Functionality.md` (referenced)
+*   `docs/DEV_TASKS.md` (updated status)
+
+
+
 ## 2025-07-31 - Feature: LLM-Powered Semantic Aggregation
 
 ### Overview

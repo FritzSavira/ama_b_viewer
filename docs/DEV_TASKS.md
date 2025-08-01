@@ -158,3 +158,10 @@ This document tracks the development tasks for the `ama_b_viewer` project.
   - **description:** Document the problem, the chosen solution (MongoDB collection + `$lookup`), and the implementation details in a new file: `docs/adr/ADR-003-Semantic-Category-Aggregation.md`.
   - **status:** pending
   - **reference:** `(self)`
+
+## Phase 5: Document Management
+
+- [x] **TASK-5.1:** Implement Document Deletion Functionality
+  - **description:** Add a "[Delete]" button to the document navigation. Implement frontend confirmation and a backend endpoint to delete the current document from the MongoDB Atlas collection.
+  - **status:** completed
+  - **reference:** `docs/adr/ADR-005-Document-Deletion-Functionality.md`

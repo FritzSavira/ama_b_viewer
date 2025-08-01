@@ -185,6 +185,28 @@ def previous_document(id):
     else:
         return "No previous document", 404
 
+@app.route('/delete/<id>', methods=['POST'])
+def delete_document(id):
+    try:
+        result = collection.delete_one({'_id': ObjectId(id)})
+        if result.deleted_count == 1:
+            # After deletion, redirect to the next available document or home
+            next_doc = collection.find_one({'_id': {'$gt': ObjectId(id)}}, sort=[('_id', 1)])
+            if next_doc:
+                return redirect(url_for('view_document', id=next_doc['_id']))
+            else:
+                # If no next document, try to find a previous one
+                previous_doc = collection.find_one({'_id': {'$lt': ObjectId(id)}}, sort=[('_id', -1)])
+                if previous_doc:
+                    return redirect(url_for('view_document', id=previous_doc['_id']))
+                else:
+                    # If no other documents, redirect to a default page or show a message
+                    return redirect(url_for('index')) # Redirect to index, which will handle empty collection
+        else:
+            return "Document not found or could not be deleted", 404
+    except Exception as e:
+        return f"Error deleting document: {e}", 500
+
 def _aggregate_field(field_path, apply_mapping=False):
     pipeline = [
         {

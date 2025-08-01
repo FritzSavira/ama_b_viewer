@@ -71,7 +71,7 @@ def get_unmapped_terms(db, field_path):
     return unmapped_terms
 
 
-def get_mappings_from_llm(terms_to_map, existing_canons=None, batch_size=200):
+def get_mappings_from_llm(terms_to_map, existing_canons=None, batch_size=500):
     """Sends a list of terms to an LLM in batches and requests mappings to a canonical form."""
     if not terms_to_map:
         print("No new terms to map. Skipping LLM call.")

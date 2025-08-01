@@ -190,6 +190,7 @@
         <a href="{{ url_for('previous_document', id=doc._id, show=show) }}">Previous</a>
         <a href="{{ url_for('next_document', id=doc._id, show=show) }}">Next</a>
         <a href="{{ url_for('view_document', id=last_doc_id, show=show) if last_doc_id else '#' }}">Last</a>
+        <a href="#" id="delete-button" style="background-color: #dc3545; color: white; border-color: #dc3545;">Delete</a>
     </div>
 
     <nav class="tab-nav">
@@ -207,6 +208,38 @@
     {% endblock %}
 
     {% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteButton = document.getElementById('delete-button');
+            if (deleteButton) {
+                deleteButton.addEventListener('click', function(event) {
+                    event.preventDefault(); // Prevent default link behavior
+
+                    if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+                        const docId = '{{ doc._id }}'; // Get the current document ID from Jinja2 context
+                        fetch(`/delete/${docId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                // Redirect to the new URL provided by the backend
+                                window.location.href = response.url;
+                            } else {
+                                return response.text().then(text => { throw new Error(text) });
+                            }
+                        })
+                        .catch(error => {
+                            alert('Error deleting document: ' + error.message);
+                            console.error('Error:', error);
+                        });
+                    }
+                });
+            }
+        });
+    </script>
     {% endblock %}
 </body>
 </html>
