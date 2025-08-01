@@ -94,6 +94,43 @@ Testing is an integral part of our development process, ensuring the quality, re
 *   **Automate When Possible:** Prioritize automated tests (unit, integration, end-to-end) to ensure rapid feedback and prevent regressions.
 *   **Manual Testing for UX/Edge Cases:** Supplement automated tests with manual testing, especially for user experience, complex interactions, and hard-to-automate edge cases.
 
+### Executing the Test Suite
+
+To ensure that all tests are run in a consistent and correct environment, follow these steps.
+
+**1. Prerequisites:**
+
+*   **Activate Virtual Environment:** Before running tests, always ensure your project's virtual environment is activated.
+*   **Install Dependencies:** Make sure all required packages, including test-specific ones, are installed by running:
+    ```bash
+    # For Windows
+    venv\Scripts\python.exe -m pip install -r requirements.txt
+
+    # For macOS/Linux
+    pip install -r requirements.txt
+    ```
+
+**2. Running Tests:**
+
+*   The project uses the `pytest` framework. To run the entire test suite, execute the following command from the **project's root directory**:
+
+    ```bash
+    # For Windows
+    venv\Scripts\python.exe -m pytest
+
+    # For macOS/Linux (with venv activated)
+    pytest
+    ```
+    *   **Note:** Using `python -m pytest` is the most reliable method as it guarantees that the `pytest` instance from the correct virtual environment is used.
+
+**3. Expected Outcome:**
+
+*   A successful test run will conclude with a summary line indicating the number of passed tests, for example:
+    ```
+    ============================== X passed in Y.YYs ==============================
+    ```
+*   Any output showing `ERROR` or `FAILED` indicates a problem that must be addressed before the task can be considered complete.
+
 ### Types of Testing
 
 1.  **Unit Tests:**

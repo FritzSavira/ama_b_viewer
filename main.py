@@ -64,7 +64,12 @@ def get_collection_schema(collection):
 
 @app.route('/')
 def index():
-    return redirect(url_for('view_document', id=collection.find_one()['_id']))
+    last_doc = collection.find_one(sort=[('_id', -1)])
+    if last_doc:
+        return redirect(url_for('view_document', id=last_doc['_id'], show='answer'))
+    else:
+        # Handle case where collection is empty
+        return "No documents found in the collection.", 404
 
 import markdown
 
@@ -125,6 +130,10 @@ def view_document(id):
     first_doc_id = first_doc['_id'] if first_doc else None
     last_doc_id = last_doc['_id'] if last_doc else None
 
+    # Determine if the current document is the first or the last
+    is_on_first_document = (doc['_id'] == first_doc_id)
+    is_on_last_document = (doc['_id'] == last_doc_id)
+
     # --- Prepare Page Title --- #
     # Safely get the information_goal for a more descriptive page title.
     page_title = "Document ID: " + str(doc.get('_id')) # Default title
@@ -141,8 +150,11 @@ def view_document(id):
     template_context = {
         'doc': doc,
         'show': show_view,
+        'active_page': show_view, # The 'show' parameter determines the active page
         'first_doc_id': first_doc_id,
         'last_doc_id': last_doc_id,
+        'is_on_first_document': is_on_first_document,
+        'is_on_last_document': is_on_last_document,
         'answer_content': None,  # Default to None
         'page_title': page_title,
         'categorized_tags': None # Default to None
@@ -368,15 +380,18 @@ def bible_theme_network():
 
 @app.route('/questions_dashboard')
 def questions_dashboard():
-    return render_template('questions_dashboard.html')
+    last_doc = collection.find_one(sort=[('_id', -1)])
+    return render_template('questions_dashboard.html', page_title='Questions Dashboard', active_page='questions_dashboard', last_doc_id=last_doc['_id'] if last_doc else None)
 
 @app.route('/tags_dashboard')
 def tags_dashboard():
-    return render_template('tags_dashboard.html')
+    last_doc = collection.find_one(sort=[('_id', -1)])
+    return render_template('tags_dashboard.html', page_title='Tags Dashboard', active_page='tags_dashboard', last_doc_id=last_doc['_id'] if last_doc else None)
 
 @app.route('/network_graph_view')
 def network_graph_view():
-    return render_template('bible_theme_network.html')
+    last_doc = collection.find_one(sort=[('_id', -1)])
+    return render_template('bible_theme_network.html', page_title='Network Graph', active_page='network_graph_view', last_doc_id=last_doc['_id'] if last_doc else None)
 
 # --- LLM-Powered Semantic Aggregation ---
 import threading

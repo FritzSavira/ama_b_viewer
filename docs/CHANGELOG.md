@@ -1,5 +1,125 @@
 # Development Log
 
+## 2025-08-01 - Refactor: Unified Navigation and UI Consistency
+
+### Overview
+Implemented a unified navigation concept to create a consistent and seamless user experience across the entire application, as documented in `ADR-006`. This refactoring eliminates navigation dead ends and improves code maintainability.
+
+### Key Changes & Rationale
+
+1.  **Unified Tab Navigation (`base.html`):**
+    *   The main tab-based navigation is now the single source of truth and is displayed on all pages, including dashboards.
+    *   The navigation logic was decoupled from requiring a `doc` object, making it globally available.
+    *   Removed hardcoded "Back to Home" links and redundant `<h1>` titles from all dashboard templates (`questions_dashboard.html`, `tags_dashboard.html`, `bible_theme_network.html`).
+
+2.  **Active Page Highlighting:**
+    *   Backend routes (`main.py`) now consistently pass a `page_title` and an `active_page` identifier to the base template.
+    *   The `base.html` template uses the `active_page` variable to dynamically apply a `.active` class to the correct tab, providing clear visual feedback of the user's location.
+
+3.  **Robust Navigation Logic:**
+    *   **Fixed a critical bug** where navigating from a dashboard back to a document view was impossible.
+    *   Dashboard routes now pass the `last_doc_id` to the template.
+    *   The navigation links in `base.html` now intelligently use the current `doc._id` if available, or fall back to the `last_doc_id` when on a dashboard page, ensuring navigation is always possible.
+
+4.  **Extended Test Coverage (`tests/test_ui_consistency.py`):**
+    *   Added a new test suite to programmatically verify that the correct navigation tab is marked as active on each respective dashboard page, preventing future regressions.
+
+### Files Modified
+*   `main.py`
+*   `templates/base.html`
+*   `templates/questions_dashboard.html`
+*   `templates/tags_dashboard.html`
+*   `templates/bible_theme_network.html`
+*   `docs/DEV_TASKS.md` (updated status)
+*   `docs/adr/ADR-006-Unified-Navigation-Concept.md` (new)
+*   `tests/test_ui_consistency.py` (new)
+
+## 2025-08-01 - Refactor: Page Layout Adjustment
+
+### Overview
+Adjusted the position of the page title for a more logical and intuitive visual hierarchy on the document view page.
+
+### Key Changes & Rationale
+
+1.  **Frontend (`templates/base.html`):**
+    *   The page title element (`<h2>{{ page_title }}</h2>`) was moved from the top of the body to a position below the main navigation buttons and the tab navigation bar.
+    *   This change ensures that the primary navigation controls remain consistently at the top, with the title for the specific content appearing directly above that content.
+
+### Files Modified
+*   `templates/base.html`
+*   `docs/DEV_TASKS.md` (updated status)
+
+## 2025-08-01 - Feature: Robust Navigation & Test Framework Setup
+
+### Overview
+This update introduces two major improvements: it prevents users from navigating into dead ends and establishes a foundational automated testing framework to ensure future code quality.
+
+### Key Changes & Rationale
+
+1.  **Feature: Prevent Navigation Dead Ends:**
+    *   **Backend (`main.py`):** The `view_document` route now detects if the user is on the first or last document and passes boolean flags (`is_on_first_document`, `is_on_last_document`) to the template.
+    *   **Frontend (`templates/base.html`):**
+        *   Added a `.disabled` CSS class to visually grey out and disable pointer events for navigation buttons.
+        *   Used Jinja2 logic to conditionally apply the `disabled` class and set `href="#"` for the `[First]`/`[Previous]` or `[Next]`/`[Last]` buttons, preventing navigation to error pages.
+        *   The keyboard shortcut script now checks for the `.disabled` class and will not trigger actions for disabled buttons.
+
+2.  **Feature: Automated Testing Framework (`pytest`):**
+    *   **Dependencies (`requirements.txt`):** Added `pytest`, `pytest-flask`, `beautifulsoup4`, and pinned `Werkzeug<3.0` to ensure compatibility with Flask 2.x.
+    *   **Configuration (`pytest.ini`, `tests/conftest.py`):**
+        *   Created `pytest.ini` to add the project root to the `pythonpath`, fixing module import errors during testing.
+        *   Created `tests/conftest.py` to define reusable test fixtures (`app`, `client`) for the Flask application.
+    *   **Initial Tests (`tests/test_navigation.py`):**
+        *   Wrote two automated tests that verify the navigation buttons are correctly disabled on the first and last documents.
+        *   These tests serve as a blueprint for future test development.
+
+### Files Modified
+*   `main.py`
+*   `templates/base.html`
+*   `requirements.txt`
+*   `docs/DEV_TASKS.md` (updated status)
+*   `tests/test_navigation.py` (new)
+*   `tests/conftest.py` (new)
+*   `pytest.ini` (new)
+
+## 2025-08-01 - Feature: Keyboard Shortcuts for Navigation
+
+### Overview
+Implemented keyboard shortcuts to enhance user experience and navigation efficiency. Users can now use keyboard keys to navigate between documents and trigger actions.
+
+### Key Changes & Rationale
+
+1.  **Frontend (`templates/base.html`):**
+    *   Added unique IDs (`first-button`, `previous-button`, `next-button`, `last-button`) to all navigation buttons for robust selection via JavaScript.
+    *   Implemented a JavaScript event listener for `keydown` events.
+    *   Mapped the following keys to actions:
+        *   `ArrowLeft`: Clicks the [Previous] button.
+        *   `ArrowRight`: Clicks the [Next] button.
+        *   `Home`: Clicks the [First] button.
+        *   `End`: Clicks the [Last] button.
+        *   `Delete`: Clicks the [Delete] button.
+    *   Added `event.preventDefault()` to stop default browser actions (like scrolling or history navigation).
+    *   The script is disabled when a user is typing in an input field or textarea.
+
+### Files Modified
+*   `templates/base.html`
+*   `docs/DEV_TASKS.md` (updated status)
+
+## 2025-08-01 - Feature: Default View on Startup
+
+### Overview
+Changed the application's startup behavior to directly display the "Answer" view of the most recent document, streamlining the user's entry into the application.
+
+### Key Changes & Rationale
+
+1.  **Backend (`main.py`):**
+    *   Modified the `index()` route (`@app.route('/')`).
+    *   Instead of redirecting to the first document, it now finds the last document in the collection (sorted by `_id` descending).
+    *   It then redirects to the `view_document` endpoint for that document, explicitly setting `show='answer'`.
+    *   Includes a fallback to handle cases where the collection is empty.
+
+### Files Modified
+*   `main.py`
+
 ## 2025-08-01 - Feature: Document Deletion Functionality
 
 ### Overview
@@ -23,86 +143,6 @@ Implemented the ability to delete individual documents from the MongoDB Atlas co
 *   `templates/base.html`
 *   `docs/adr/ADR-005-Document-Deletion-Functionality.md` (referenced)
 *   `docs/DEV_TASKS.md` (updated status)
-
-
-
-## 2025-08-01 - Feature: Document Deletion Functionality
-
-### Overview
-Implemented the ability to delete individual documents from the MongoDB Atlas collection directly from the UI, enhancing data management capabilities.
-
-### Key Changes & Rationale
-
-1.  **Backend (`main.py`):**
-    *   Added a new POST endpoint `/delete/<id>` to handle document deletion requests.
-    *   Implemented logic to delete the document by its `_id`.
-    *   After successful deletion, the user is redirected to the next available document (if any), or to the previous document, or to the home page if no other documents exist.
-    *   Includes basic error handling for deletion failures.
-
-2.  **Frontend (`templates/base.html`):**
-    *   Added a `[Delete]` button to the document navigation bar.
-    *   Implemented client-side JavaScript with a confirmation dialog to prevent accidental deletions.
-    *   The JavaScript sends a POST request to the backend endpoint and handles redirection based on the backend's response.
-
-### Files Modified
-*   `main.py`
-*   `templates/base.html`
-*   `docs/adr/ADR-005-Document-Deletion-Functionality.md` (referenced)
-*   `docs/DEV_TASKS.md` (updated status)
-
-
-
-## 2025-08-01 - Feature: Document Deletion Functionality
-
-### Overview
-Implemented the ability to delete individual documents from the MongoDB Atlas collection directly from the UI, enhancing data management capabilities.
-
-### Key Changes & Rationale
-
-1.  **Backend (`main.py`):**
-    *   Added a new POST endpoint `/delete/<id>` to handle document deletion requests.
-    *   Implemented logic to delete the document by its `_id`.
-    *   After successful deletion, the user is redirected to the next available document (if any), or to the previous document, or to the home page if no other documents exist.
-    *   Includes basic error handling for deletion failures.
-
-2.  **Frontend (`templates/base.html`):**
-    *   Added a `[Delete]` button to the document navigation bar.
-    *   Implemented client-side JavaScript with a confirmation dialog to prevent accidental deletions.
-    *   The JavaScript sends a POST request to the backend endpoint and handles redirection based on the backend's response.
-
-### Files Modified
-*   `main.py`
-*   `templates/base.html`
-*   `docs/adr/ADR-005-Document-Deletion-Functionality.md` (referenced)
-*   `docs/DEV_TASKS.md` (updated status)
-
-
-
-## 2025-08-01 - Feature: Document Deletion Functionality
-
-### Overview
-Implemented the ability to delete individual documents from the MongoDB Atlas collection directly from the UI, enhancing data management capabilities.
-
-### Key Changes & Rationale
-
-1.  **Backend (`main.py`):**
-    *   Added a new POST endpoint `/delete/<id>` to handle document deletion requests.
-    *   Implemented logic to delete the document by its `_id`.
-    *   After successful deletion, the user is redirected to the next available document (if any), or to the previous document, or to the home page if no other documents exist.
-    *   Includes basic error handling for deletion failures.
-
-2.  **Frontend (`templates/base.html`):**
-    *   Added a `[Delete]` button to the document navigation bar.
-    *   Implemented client-side JavaScript with a confirmation dialog to prevent accidental deletions.
-    *   The JavaScript sends a POST request to the backend endpoint and handles redirection based on the backend's response.
-
-### Files Modified
-*   `main.py`
-*   `templates/base.html`
-*   `docs/adr/ADR-005-Document-Deletion-Functionality.md` (referenced)
-*   `docs/DEV_TASKS.md` (updated status)
-
-
 
 ## 2025-07-31 - Feature: LLM-Powered Semantic Aggregation
 
@@ -127,7 +167,7 @@ Implemented a robust LLM-powered system to automatically normalize varying categ
 *   `main.py`
 *   `llm_mapper.py`
 *   `tags_dashboard.html`
-*   `DEV_TASKS.md` (updated status)
+*   `docs/DEV_TASKS.md` (updated status)
 *   `docs/adr/ADR-003-LLM-Powered-Semantic-Aggregation.md` (updated status)
 
 ## 2025-07-28 - Refactor: Menu Order and Question View Removal

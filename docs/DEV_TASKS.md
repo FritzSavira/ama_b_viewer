@@ -165,3 +165,64 @@ This document tracks the development tasks for the `ama_b_viewer` project.
   - **description:** Add a "[Delete]" button to the document navigation. Implement frontend confirmation and a backend endpoint to delete the current document from the MongoDB Atlas collection.
   - **status:** completed
   - **reference:** `docs/adr/ADR-005-Document-Deletion-Functionality.md`
+
+## Phase 6: UI/UX Enhancements
+
+- [x] **TASK-6.1:** Implement Keyboard Shortcuts for Navigation
+  - **description:** Add keyboard shortcuts (Arrow keys, Home, End, Delete) for document navigation and deletion to improve usability.
+  - **status:** completed
+  - **reference:** (none)
+
+- [x] **TASK-6.2:** Prevent Navigation Dead Ends
+  - **description:** Proactively disable 'Next'/'Previous' buttons on the first and last documents to prevent users from navigating to an error page.
+  - **status:** completed
+  - **reference:** (none)
+
+- [x] **TASK-6.3:** Adjust Page Title Position
+  - **description:** Moved the page title (`<h2>`) to be displayed below the main navigation and tab navigation for better visual hierarchy.
+  - **status:** completed
+  - **reference:** (none)
+
+## Phase 7: Quality Assurance & CI
+
+- [x] **TASK-7.1:** Setup Automated Testing Framework
+  - **description:** Added `pytest`, `pytest-flask`, and `beautifulsoup4` to `requirements.txt`. Created `tests/` directory, `conftest.py` for configuration, and `pytest.ini` to resolve import paths.
+  - **status:** completed
+  - **reference:** (none)
+
+- [x] **TASK-7.2:** Write Initial Navigation Tests
+  - **description:** Implemented automated tests in `tests/test_navigation.py` to verify that navigation buttons are correctly disabled on the first and last documents.
+  - **status:** completed
+  - **reference:** (none)
+
+- [x] **TASK-7.3:** Fix Test Environment Incompatibility
+  - **description:** Pinned `Werkzeug<3.0` in `requirements.txt` to resolve an `AttributeError` and ensure compatibility with the existing Flask version.
+  - **status:** completed
+  - **reference:** (none)
+
+## Phase 8: UI/UX Refactoring
+
+- [x] **TASK-8.1:** Create ADR for Unified Navigation
+  - **description:** Document the decision and rationale for moving to a single, consistent navigation structure in `docs/adr/ADR-006-Unified-Navigation-Concept.md`.
+  - **status:** completed
+  - **reference:** (self)
+
+- [x] **TASK-8.2:** Refactor Backend for Unified Navigation
+  - **description:** Update dashboard routes in `main.py` to pass `page_title` and `active_page` context variables to the templates.
+  - **status:** completed
+  - **reference:** `docs/adr/ADR-006-Unified-Navigation-Concept.md`
+
+- [x] **TASK-8.3:** Refactor Frontend for Unified Navigation
+  - **description:** Integrate dashboard links into the main tab navigation in `base.html`. Remove hardcoded titles and "Back to Home" links from all dashboard templates.
+  - **status:** completed
+  - **reference:** `docs/adr/ADR-006-Unified-Navigation-Concept.md`
+
+- [x] **TASK-8.4:** Extend Test Suite for UI Consistency
+  - **description:** Add new tests to `tests/test_ui_consistency.py` to verify that the correct navigation tab has the `active` class on each page.
+  - **status:** completed
+  - **reference:** `docs/adr/ADR-006-Unified-Navigation-Concept.md`
+
+- [x] **TASK-8.5:** Fix Navigation from Dashboards to Documents
+  - **description:** Passed `last_doc_id` to dashboard routes and updated `base.html` to use it as a fallback, enabling navigation from dashboards back to the latest document view.
+  - **status:** completed
+  - **reference:** `docs/adr/ADR-006-Unified-Navigation-Concept.md`

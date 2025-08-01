@@ -10,6 +10,13 @@
         .navigation { margin-top: 20px; }
         .navigation a { margin-right: 10px; text-decoration: none; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; color: #333; }
         .navigation a:hover { background-color: #eee; }
+        .navigation a.disabled {
+            color: #aaa;
+            background-color: #f9f9f9;
+            pointer-events: none; /* Make it unclickable */
+            cursor: not-allowed;
+            border-color: #eee;
+        }
         .tab-nav { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
         .tab-nav a {
             display: inline-block;
@@ -182,27 +189,27 @@
     </style>
 </head>
 <body>
-    <h2>{{ page_title }}</h2>
+    <nav class="tab-nav">
+        <a href="{{ url_for('view_document', id=doc._id if doc else last_doc_id, show='question_abstraction') }}" class="{{ 'active' if active_page == 'question_abstraction' else '' }} {{ 'disabled' if not (doc or last_doc_id) else '' }}">Question Abstraction</a>
+        <a href="{{ url_for('view_document', id=doc._id if doc else last_doc_id, show='answer') }}" class="{{ 'active' if active_page == 'answer' else '' }} {{ 'disabled' if not (doc or last_doc_id) else '' }}">Answer</a>
+        <a href="{{ url_for('view_document', id=doc._id if doc else last_doc_id, show='tags') }}" class="{{ 'active' if active_page == 'tags' else '' }} {{ 'disabled' if not (doc or last_doc_id) else '' }}">Tags</a>
+        <a href="{{ url_for('view_document', id=doc._id if doc else last_doc_id, show='all') }}" class="{{ 'active' if active_page == 'all' else '' }} {{ 'disabled' if not (doc or last_doc_id) else '' }}">All</a>
+        <a href="{{ url_for('questions_dashboard') }}" class="{{ 'active' if active_page == 'questions_dashboard' else '' }}">Questions Dashboard</a>
+        <a href="{{ url_for('tags_dashboard') }}" class="{{ 'active' if active_page == 'tags_dashboard' else '' }}">Tags Dashboard</a>
+        <a href="{{ url_for('network_graph_view') }}" class="{{ 'active' if active_page == 'network_graph_view' else '' }}">Network Graph</a>
+    </nav>
 
     {% if doc %}
     <div class="navigation">
-        <a href="{{ url_for('view_document', id=first_doc_id, show=show) if first_doc_id else '#' }}">First</a>
-        <a href="{{ url_for('previous_document', id=doc._id, show=show) }}">Previous</a>
-        <a href="{{ url_for('next_document', id=doc._id, show=show) }}">Next</a>
-        <a href="{{ url_for('view_document', id=last_doc_id, show=show) if last_doc_id else '#' }}">Last</a>
+        <a id="first-button" href="{{ url_for('view_document', id=first_doc_id, show=show) if not is_on_first_document else '#' }}" class="{{ 'disabled' if is_on_first_document else '' }}">First</a>
+        <a id="previous-button" href="{{ url_for('previous_document', id=doc._id, show=show) if not is_on_first_document else '#' }}" class="{{ 'disabled' if is_on_first_document else '' }}">Previous</a>
+        <a id="next-button" href="{{ url_for('next_document', id=doc._id, show=show) if not is_on_last_document else '#' }}" class="{{ 'disabled' if is_on_last_document else '' }}">Next</a>
+        <a id="last-button" href="{{ url_for('view_document', id=last_doc_id, show=show) if not is_on_last_document else '#' }}" class="{{ 'disabled' if is_on_last_document else '' }}">Last</a>
         <a href="#" id="delete-button" style="background-color: #dc3545; color: white; border-color: #dc3545;">Delete</a>
     </div>
+    {% endif %}
 
-    <nav class="tab-nav">
-        <a href="{{ url_for('view_document', id=doc._id, show='question_abstraction') }}" class="{{ 'active' if show == 'question_abstraction' else '' }}">Question Abstraction</a>
-        <a href="{{ url_for('view_document', id=doc._id, show='answer') }}" class="{{ 'active' if show == 'answer' else '' }}">Answer</a>
-        <a href="{{ url_for('view_document', id=doc._id, show='tags') }}" class="{{ 'active' if show == 'tags' else '' }}">Tags</a>
-        <a href="{{ url_for('view_document', id=doc._id, show='all') }}" class="{{ 'active' if show == 'all' else '' }}">All</a>
-        <a href="{{ url_for('questions_dashboard') }}">Questions Dashboard</a>
-        <a href="{{ url_for('tags_dashboard') }}">Tags Dashboard</a>
-        <a href="{{ url_for('network_graph_view') }}">Network Graph</a>
-    </nav>
-{% endif %}
+    <h2>{{ page_title }}</h2>
 
     {% block content %}
     {% endblock %}
@@ -238,6 +245,45 @@
                     }
                 });
             }
+
+            // --- Keyboard Shortcut Implementation ---
+            document.addEventListener('keydown', function(event) {
+                // Helper function to safely click an element by its ID, if it's not disabled
+                const click = (elementId) => {
+                    const element = document.getElementById(elementId);
+                    if (element && !element.classList.contains('disabled')) {
+                        element.click();
+                    }
+                };
+
+                // We don't want to interfere with typing in input fields
+                if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                    return;
+                }
+
+                switch(event.key) {
+                    case 'ArrowLeft':
+                        event.preventDefault(); // Prevent browser back navigation
+                        click('previous-button');
+                        break;
+                    case 'ArrowRight':
+                        event.preventDefault();
+                        click('next-button');
+                        break;
+                    case 'Home':
+                        event.preventDefault(); // Prevent scrolling to top
+                        click('first-button');
+                        break;
+                    case 'End':
+                        event.preventDefault(); // Prevent scrolling to bottom
+                        click('last-button');
+                        break;
+                    case 'Delete':
+                        event.preventDefault();
+                        click('delete-button');
+                        break;
+                }
+            });
         });
     </script>
     {% endblock %}
