@@ -34,10 +34,19 @@ def get_mongo_client():
 
 try:
     client = get_mongo_client()
+    # Test connection
+    client.admin.command('ping')
     db = client["ama_browser"]
     collection = db["ama_log"]
+    print("Successfully connected to MongoDB.")
 except Exception as e:
-    raise RuntimeError(f"Error connecting to MongoDB: {e}")
+    print(f"\nERROR: Could not connect to MongoDB.")
+    print(f"Details: {e}")
+    print("\nPlease ensure MONGODB_URI is set correctly in your .env file.")
+    print("Example: MONGODB_URI=mongodb://localhost:27017/your_db\n")
+    # Exit gracefully instead of crashing with a long traceback
+    import sys
+    sys.exit(1)
 
 # Global constants for collection names
 SOURCE_COLLECTION = "ama_log"
@@ -492,4 +501,5 @@ def get_llm_mapping_status():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=False)
+    # Using host='0.0.0.0' allows access from outside the container and helps avoid localhost vs 127.0.0.1 issues.
+    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)

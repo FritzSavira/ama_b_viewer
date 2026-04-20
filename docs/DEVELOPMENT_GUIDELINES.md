@@ -1,6 +1,6 @@
 # Development Guidelines: Coherent Documentation Management
 
-This document outlines the strategy for managing documentation within the `ama_b_viewer` project to ensure consistency, clarity, and effective communication among developers. By adhering to these guidelines, we aim to provide a comprehensive understanding of the project's history, current state, and future direction.
+This document outlines the strategy for managing documentation within this project to ensure consistency, clarity, and effective communication among developers. By adhering to these guidelines, we aim to provide a comprehensive understanding of the project's history, current state, and future direction.
 
 ## 1. Centralizing Documentation
 
