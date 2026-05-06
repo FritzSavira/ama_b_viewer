@@ -12,6 +12,9 @@
             <p>No 'question' field found for this document.</p>
         {% endif %}
     {% elif show == 'answer' %}
+        <div style="margin-bottom: 10px; color: #666; font-size: 0.9em;">
+            <strong>Erstellt am:</strong> {{ creation_time | datetimeformat }}
+        </div>
         <h2>Answer</h2>
         <div class="rendered-markdown">
             {% if answer_content %}
@@ -21,6 +24,9 @@
             {% endif %}
         </div>
     {% elif show == 'tags' %}
+        <div style="margin-bottom: 10px; color: #666; font-size: 0.9em;">
+            <strong>Erstellt am:</strong> {{ creation_time | datetimeformat }}
+        </div>
         <h2>Tags</h2>
         <div class="tag-categories-container">
             {% if categorized_tags %}

@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <div style="margin-bottom: 10px; color: #666; font-size: 0.9em;">
+        <strong>Erstellt am:</strong> {{ creation_time | datetimeformat }}
+    </div>
     <h2>Question Abstraction</h2>
     {% if doc.question_abstraction %}
         <div class="question-abstraction-section">

@@ -23,6 +23,13 @@ def tojson_filter(value, indent=None):
             return json.JSONEncoder.default(self, obj)
     return json.dumps(value, indent=indent, cls=CustomEncoder)
 
+@app.template_filter('datetimeformat')
+def datetimeformat_filter(value, format='%d.%m.%Y %H:%M:%S'):
+    """Formats a datetime object to a string."""
+    if value is None:
+        return ""
+    return value.strftime(format)
+
 
 # Initialize MongoDB connection
 def get_mongo_client():
@@ -158,6 +165,7 @@ def view_document(id):
     # Prepare template context
     template_context = {
         'doc': doc,
+        'creation_time': doc['_id'].generation_time,
         'show': show_view,
         'active_page': show_view, # The 'show' parameter determines the active page
         'first_doc_id': first_doc_id,
